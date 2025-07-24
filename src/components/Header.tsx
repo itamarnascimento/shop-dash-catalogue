@@ -1,8 +1,10 @@
 import React from 'react';
-import { ShoppingCart, Search, User } from 'lucide-react';
+import { ShoppingCart, Search, User, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface HeaderProps {
   onSearchChange: (query: string) => void;
@@ -11,6 +13,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
   const { getTotalItems } = useCart();
+  const { user, signOut, profile } = useAuth();
   const totalItems = getTotalItems();
 
   return (
@@ -40,9 +43,30 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
 
           {/* Actions */}
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="relative">
-              <User className="w-5 h-5" />
-            </Button>
+            {user ? (
+              <>
+                <div className="hidden sm:flex items-center space-x-2 mr-2">
+                  <span className="text-sm text-muted-foreground">
+                    Olá, {profile?.nome_completo || user.email}
+                  </span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={signOut}
+                  title="Sair"
+                >
+                  <LogOut className="w-5 h-5" />
+                </Button>
+              </>
+            ) : (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/auth">
+                  <User className="w-4 h-4 mr-2" />
+                  Entrar
+                </Link>
+              </Button>
+            )}
             
             <Button 
               variant="ghost" 
