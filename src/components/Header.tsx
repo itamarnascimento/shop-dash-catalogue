@@ -1,8 +1,9 @@
 import React from 'react';
-import { ShoppingCart, Search, User, LogOut } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ShoppingCart, Search, User, LogOut, Heart, Package, Settings } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 
@@ -14,6 +15,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
   const { getTotalItems } = useCart();
   const { user, signOut, profile } = useAuth();
+  const location = useLocation();
   const totalItems = getTotalItems();
 
   return (
@@ -21,12 +23,12 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 bg-gradient-to-r from-primary to-blue-500 rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-lg">T</span>
             </div>
             <h1 className="text-xl font-bold text-foreground">TechStore</h1>
-          </div>
+          </Link>
 
           {/* Search Bar */}
           <div className="flex-1 max-w-md mx-4">
@@ -45,16 +47,81 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
           <div className="flex items-center space-x-2">
             {user ? (
               <>
-                <div className="hidden sm:flex items-center space-x-2 mr-2">
-                  <span className="text-sm text-muted-foreground">
-                    Olá, {profile?.nome_completo || user.email}
-                  </span>
-                </div>
+                {/* Navigation Links */}
+                <nav className="hidden md:flex items-center space-x-1 mr-4">
+                  <Button 
+                    variant={location.pathname === '/' ? 'secondary' : 'ghost'} 
+                    size="sm" 
+                    asChild
+                  >
+                    <Link to="/">
+                      Produtos
+                    </Link>
+                  </Button>
+                  <Button 
+                    variant={location.pathname === '/wishlist' ? 'secondary' : 'ghost'} 
+                    size="sm" 
+                    asChild
+                  >
+                    <Link to="/wishlist">
+                      <Heart className="w-4 h-4 mr-1" />
+                      Lista de Desejos
+                    </Link>
+                  </Button>
+                  <Button 
+                    variant={location.pathname === '/orders' ? 'secondary' : 'ghost'} 
+                    size="sm" 
+                    asChild
+                  >
+                    <Link to="/orders">
+                      <Package className="w-4 h-4 mr-1" />
+                      Pedidos
+                    </Link>
+                  </Button>
+                </nav>
+
+                {/* User Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="hidden sm:flex">
+                      <User className="w-4 h-4 mr-2" />
+                      {profile?.nome_completo || user.email}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link to="/wishlist">
+                        <Heart className="w-4 h-4 mr-2" />
+                        Lista de Desejos
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders">
+                        <Package className="w-4 h-4 mr-2" />
+                        Histórico de Pedidos
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/products">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Gerenciar Produtos
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sair
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Mobile logout button */}
                 <Button 
                   variant="ghost" 
                   size="icon" 
                   onClick={signOut}
                   title="Sair"
+                  className="sm:hidden"
                 >
                   <LogOut className="w-5 h-5" />
                 </Button>

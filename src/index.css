@@ -142,3 +142,49 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  /* Classes para animações e interações */
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  .hover-lift {
+    @apply transition-all duration-300 hover:shadow-elegant hover:-translate-y-1;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-warm-coral bg-clip-text text-transparent;
+  }
+  
+  .glass-effect {
+    @apply bg-background/80 backdrop-blur-md border border-border/50;
+  }
+  
+  /* Estilos para produtos */
+  .product-card {
+    @apply bg-card/80 backdrop-blur-sm border-0 transition-all duration-300 hover:shadow-product hover:scale-[1.02];
+  }
+  
+  /* Layout responsivo */
+  .container-responsive {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Botões customizados */
+  .btn-gradient {
+    @apply bg-gradient-to-r from-primary to-warm-coral hover:from-primary/90 hover:to-warm-coral/90 text-primary-foreground;
+  }
+  
+  .btn-outline-warm {
+    @apply border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+}

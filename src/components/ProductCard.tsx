@@ -35,7 +35,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <Card className="group h-full overflow-hidden border-0 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:shadow-product hover:scale-[1.02] animate-fade-in">
+    <Card className="product-card group h-full overflow-hidden animate-fade-in">
       <CardContent className="p-0">
         <div className="relative overflow-hidden">
           <img
@@ -121,7 +121,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <Button 
               onClick={handleAddToCart} 
               disabled={!product.inStock}
-              className="w-full bg-gradient-to-r from-primary to-warm-coral hover:from-primary/90 hover:to-warm-coral/90 hover:shadow-warm transition-all duration-300 transform hover:scale-[1.02]"
+              className="w-full btn-gradient hover:shadow-warm transition-all duration-300 transform hover:scale-[1.02]"
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
               {product.inStock ? 'Adicionar ao Carrinho' : 'Indisponível'}

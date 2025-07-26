@@ -1,5 +1,6 @@
 import React from 'react';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   Sheet,
   SheetContent,
@@ -10,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -18,6 +20,8 @@ interface CartDrawerProps {
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -32,6 +36,15 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     } else {
       updateQuantity(productId, newQuantity);
     }
+  };
+
+  const handleCheckout = () => {
+    if (!user) {
+      navigate('/auth');
+    } else {
+      navigate('/checkout');
+    }
+    onClose();
   };
 
   return (
@@ -139,8 +152,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                   <Button 
                     className="w-full bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90"
                     size="lg"
+                    onClick={handleCheckout}
                   >
-                    Finalizar Compra
+                    {user ? 'Finalizar Compra' : 'Entrar e Finalizar'}
                   </Button>
                   
                   <div className="flex space-x-2">
