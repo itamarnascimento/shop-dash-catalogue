@@ -6,8 +6,21 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Order, OrderItem } from '@/types/database';
 
-interface OrderWithItems extends Omit<Order, 'status'> {
+interface OrderWithItems {
+  id: string;
+  user_id: string;
   status: string;
+  total_amount: number;
+  shipping_address: {
+    name: string;
+    street: string;
+    city: string;
+    state: string;
+    zip_code: string;
+    phone: string;
+  };
+  created_at: string;
+  updated_at: string;
   order_items: OrderItem[];
 }
 
@@ -36,7 +49,7 @@ const OrderHistory: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+      setOrders((data || []) as OrderWithItems[]);
     } catch (error) {
       console.error('Erro ao carregar histórico:', error);
     } finally {
