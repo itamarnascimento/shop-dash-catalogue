@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { Search, UserPlus, Shield, Users } from 'lucide-react';
+import { Search, UserPlus, Shield, Users, Edit, Plus } from 'lucide-react';
 
 interface UserRole {
   id: string;
@@ -21,7 +24,14 @@ interface Profile {
   id: string;
   user_id: string;
   nome_completo: string | null;
+  telefone: string | null;
+  endereco: string | null;
+  cidade: string | null;
+  estado: string | null;
+  cep: string | null;
+  data_nascimento: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 const UserManagement = () => {
@@ -29,6 +39,20 @@ const UserManagement = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    nome_completo: '',
+    telefone: '',
+    endereco: '',
+    cidade: '',
+    estado: '',
+    cep: '',
+    data_nascimento: '',
+    role: 'user' as 'admin' | 'user'
+  });
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -110,6 +134,147 @@ const UserManagement = () => {
     }
   };
 
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.email || (!editingProfile && !formData.password)) {
+      toast({
+        title: "Erro",
+        description: "Email e senha são obrigatórios para criar um usuário.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      if (editingProfile) {
+        // Update existing profile
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            nome_completo: formData.nome_completo || null,
+            telefone: formData.telefone || null,
+            endereco: formData.endereco || null,
+            cidade: formData.cidade || null,
+            estado: formData.estado || null,
+            cep: formData.cep || null,
+            data_nascimento: formData.data_nascimento || null,
+          })
+          .eq('id', editingProfile.id);
+
+        if (error) throw error;
+
+        // Update role if changed
+        await updateUserRole(editingProfile.user_id, formData.role);
+
+        toast({
+          title: "Sucesso",
+          description: "Usuário atualizado com sucesso!",
+        });
+      } else {
+        // Create new user
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              nome_completo: formData.nome_completo
+            }
+          }
+        });
+
+        if (authError) throw authError;
+
+        if (authData.user) {
+          // Update profile with additional data
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({
+              nome_completo: formData.nome_completo || null,
+              telefone: formData.telefone || null,
+              endereco: formData.endereco || null,
+              cidade: formData.cidade || null,
+              estado: formData.estado || null,
+              cep: formData.cep || null,
+              data_nascimento: formData.data_nascimento || null,
+            })
+            .eq('user_id', authData.user.id);
+
+          if (profileError) throw profileError;
+
+          // Set user role
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({ user_id: authData.user.id, role: formData.role });
+
+          if (roleError) throw roleError;
+
+          toast({
+            title: "Sucesso",
+            description: "Usuário criado com sucesso!",
+          });
+        }
+      }
+
+      setDialogOpen(false);
+      setEditingProfile(null);
+      setFormData({
+        email: '',
+        password: '',
+        nome_completo: '',
+        telefone: '',
+        endereco: '',
+        cidade: '',
+        estado: '',
+        cep: '',
+        data_nascimento: '',
+        role: 'user'
+      });
+      fetchUsersAndRoles();
+    } catch (error: any) {
+      console.error('Error saving user:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível salvar o usuário.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditUser = (profile: Profile) => {
+    setEditingProfile(profile);
+    setFormData({
+      email: '',
+      password: '',
+      nome_completo: profile.nome_completo || '',
+      telefone: profile.telefone || '',
+      endereco: profile.endereco || '',
+      cidade: profile.cidade || '',
+      estado: profile.estado || '',
+      cep: profile.cep || '',
+      data_nascimento: profile.data_nascimento || '',
+      role: getUserRole(profile.user_id)
+    });
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setEditingProfile(null);
+    setFormData({
+      email: '',
+      password: '',
+      nome_completo: '',
+      telefone: '',
+      endereco: '',
+      cidade: '',
+      estado: '',
+      cep: '',
+      data_nascimento: '',
+      role: 'user'
+    });
+  };
+
   const filteredUsers = profiles.filter(profile =>
     profile.nome_completo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     profile.user_id.toLowerCase().includes(searchQuery.toLowerCase())
@@ -147,9 +312,9 @@ const UserManagement = () => {
         </div>
       </div>
 
-      {/* Search and Stats */}
+      {/* Search, Add and Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="md:col-span-2">
+        <div className="md:col-span-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
@@ -160,6 +325,157 @@ const UserManagement = () => {
               className="pl-10"
             />
           </div>
+        </div>
+        <div className="flex justify-end">
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Usuário
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <form onSubmit={handleCreateUser}>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingProfile ? 'Editar Usuário' : 'Novo Usuário'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingProfile 
+                      ? 'Atualize as informações do usuário.' 
+                      : 'Crie um novo usuário no sistema.'
+                    }
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="grid gap-4 py-4">
+                  {!editingProfile && (
+                    <>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="email">Email *</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                            placeholder="usuario@exemplo.com"
+                            required={!editingProfile}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="password">Senha *</Label>
+                          <Input
+                            id="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            placeholder="Senha do usuário"
+                            required={!editingProfile}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="nome_completo">Nome Completo</Label>
+                      <Input
+                        id="nome_completo"
+                        value={formData.nome_completo}
+                        onChange={(e) => setFormData({...formData, nome_completo: e.target.value})}
+                        placeholder="Nome completo do usuário"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="telefone">Telefone</Label>
+                      <Input
+                        id="telefone"
+                        value={formData.telefone}
+                        onChange={(e) => setFormData({...formData, telefone: e.target.value})}
+                        placeholder="(11) 99999-9999"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="endereco">Endereço</Label>
+                    <Input
+                      id="endereco"
+                      value={formData.endereco}
+                      onChange={(e) => setFormData({...formData, endereco: e.target.value})}
+                      placeholder="Rua, número, complemento"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="cidade">Cidade</Label>
+                      <Input
+                        id="cidade"
+                        value={formData.cidade}
+                        onChange={(e) => setFormData({...formData, cidade: e.target.value})}
+                        placeholder="Cidade"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="estado">Estado</Label>
+                      <Input
+                        id="estado"
+                        value={formData.estado}
+                        onChange={(e) => setFormData({...formData, estado: e.target.value})}
+                        placeholder="UF"
+                        maxLength={2}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="cep">CEP</Label>
+                      <Input
+                        id="cep"
+                        value={formData.cep}
+                        onChange={(e) => setFormData({...formData, cep: e.target.value})}
+                        placeholder="00000-000"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="data_nascimento">Data de Nascimento</Label>
+                      <Input
+                        id="data_nascimento"
+                        type="date"
+                        value={formData.data_nascimento}
+                        onChange={(e) => setFormData({...formData, data_nascimento: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="role">Permissão</Label>
+                      <Select value={formData.role} onValueChange={(value: 'admin' | 'user') => setFormData({...formData, role: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">Usuário</SelectItem>
+                          <SelectItem value="admin">Administrador</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={handleDialogClose}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit">
+                    {editingProfile ? 'Atualizar' : 'Criar'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
         <Card>
           <CardContent className="p-4">
@@ -224,25 +540,34 @@ const UserManagement = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {profile.user_id !== user?.id && (
-                        <Select
-                          value={currentRole}
-                          onValueChange={(newRole: 'admin' | 'user') => 
-                            updateUserRole(profile.user_id, newRole)
-                          }
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditUser(profile)}
                         >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="user">Usuário</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                      {profile.user_id === user?.id && (
-                        <Badge variant="outline">Você</Badge>
-                      )}
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        {profile.user_id !== user?.id && (
+                          <Select
+                            value={currentRole}
+                            onValueChange={(newRole: 'admin' | 'user') => 
+                              updateUserRole(profile.user_id, newRole)
+                            }
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">Usuário</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                        {profile.user_id === user?.id && (
+                          <Badge variant="outline">Você</Badge>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
