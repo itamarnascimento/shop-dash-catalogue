@@ -107,6 +107,18 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
                         Gerenciar Produtos
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/categories">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Gerenciar Categorias
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/users">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Gerenciar Usuários
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut}>
                       <LogOut className="w-4 h-4 mr-2" />
