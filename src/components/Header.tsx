@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface HeaderProps {
   onSearchChange: (query: string) => void;
@@ -15,6 +16,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
   const { getTotalItems } = useCart();
   const { user, signOut, profile } = useAuth();
+  const { isAdmin } = useUserRole();
   const location = useLocation();
   const totalItems = getTotalItems();
 
@@ -101,24 +103,29 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
                         Histórico de Pedidos
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin/products">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Gerenciar Produtos
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin/categories">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Gerenciar Categorias
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin/users">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Gerenciar Usuários
-                      </Link>
-                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/products">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Gerenciar Produtos
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/categories">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Gerenciar Categorias
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/users">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Gerenciar Usuários
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut}>
                       <LogOut className="w-4 h-4 mr-2" />

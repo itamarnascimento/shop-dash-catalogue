@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import ProtectedAdminRoute from "@/components/ProtectedAdminRoute";
 import { WishlistProvider } from "@/context/WishlistContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -33,9 +34,21 @@ const App = () => (
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/orders" element={<OrderHistory />} />
-              <Route path="/admin/products" element={<ProductManagement />} />
-              <Route path="/admin/users" element={<UserManagement />} />
-              <Route path="/admin/categories" element={<CategoryManagement />} />
+              <Route path="/admin/products" element={
+                <ProtectedAdminRoute>
+                  <ProductManagement />
+                </ProtectedAdminRoute>
+              } />
+              <Route path="/admin/users" element={
+                <ProtectedAdminRoute>
+                  <UserManagement />
+                </ProtectedAdminRoute>
+              } />
+              <Route path="/admin/categories" element={
+                <ProtectedAdminRoute>
+                  <CategoryManagement />
+                </ProtectedAdminRoute>
+              } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
