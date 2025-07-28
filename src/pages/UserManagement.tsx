@@ -164,6 +164,15 @@ const UserManagement = () => {
 
         if (error) throw error;
 
+        // Update password if provided
+        if (formData.password.trim()) {
+          const { error: passwordError } = await supabase.auth.admin.updateUserById(
+            editingProfile.user_id,
+            { password: formData.password }
+          );
+          if (passwordError) throw passwordError;
+        }
+
         // Update role if changed
         await updateUserRole(editingProfile.user_id, formData.role);
 
@@ -350,32 +359,43 @@ const UserManagement = () => {
                 
                 <div className="grid gap-4 py-4">
                   {!editingProfile && (
-                    <>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="email">Email *</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({...formData, email: e.target.value})}
-                            placeholder="usuario@exemplo.com"
-                            required={!editingProfile}
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor="password">Senha *</Label>
-                          <Input
-                            id="password"
-                            type="password"
-                            value={formData.password}
-                            onChange={(e) => setFormData({...formData, password: e.target.value})}
-                            placeholder="Senha do usuário"
-                            required={!editingProfile}
-                          />
-                        </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="email">Email *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                          placeholder="usuario@exemplo.com"
+                          required={!editingProfile}
+                        />
                       </div>
-                    </>
+                      <div className="grid gap-2">
+                        <Label htmlFor="password">Senha *</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          value={formData.password}
+                          onChange={(e) => setFormData({...formData, password: e.target.value})}
+                          placeholder="Senha do usuário"
+                          required={!editingProfile}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  {editingProfile && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="password">Nova Senha (opcional)</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                        placeholder="Deixe em branco para manter a senha atual"
+                      />
+                    </div>
                   )}
                   
                   <div className="grid grid-cols-2 gap-4">
