@@ -25,11 +25,13 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary to-blue-500 rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">T</span>
-            </div>
-            <h1 className="text-xl font-bold text-foreground">TechStore</h1>
+          <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+            <img 
+              src="/lovable-uploads/137beee5-807f-4387-b7cb-717db9d00a6d.png" 
+              alt="Dias personalizados" 
+              className="w-12 h-12 object-contain"
+            />
+            <h1 className="text-xl font-bold text-foreground hidden sm:block">Dias personalizados</h1>
           </Link>
 
           {/* Search Bar */}
