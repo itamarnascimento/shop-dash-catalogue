@@ -44,6 +44,7 @@ const UserManagement = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
     nome_completo: '',
     telefone: '',
     endereco: '',
@@ -146,6 +147,17 @@ const UserManagement = () => {
       return;
     }
 
+    // Validar confirmação de senha para criação ou edição com senha
+    if ((!editingProfile && formData.password !== formData.confirmPassword) || 
+        (editingProfile && formData.password.trim() && formData.password !== formData.confirmPassword)) {
+      toast({
+        title: "Erro",
+        description: "As senhas não coincidem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       if (editingProfile) {
         // Update existing profile
@@ -230,6 +242,7 @@ const UserManagement = () => {
       setFormData({
         email: '',
         password: '',
+        confirmPassword: '',
         nome_completo: '',
         telefone: '',
         endereco: '',
@@ -255,6 +268,7 @@ const UserManagement = () => {
     setFormData({
       email: '',
       password: '',
+      confirmPassword: '',
       nome_completo: profile.nome_completo || '',
       telefone: profile.telefone || '',
       endereco: profile.endereco || '',
@@ -273,6 +287,7 @@ const UserManagement = () => {
     setFormData({
       email: '',
       password: '',
+      confirmPassword: '',
       nome_completo: '',
       telefone: '',
       endereco: '',
@@ -338,7 +353,7 @@ const UserManagement = () => {
         <div className="flex justify-end">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button>
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Usuário
               </Button>
@@ -359,42 +374,69 @@ const UserManagement = () => {
                 
                 <div className="grid gap-4 py-4">
                   {!editingProfile && (
+                    <>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="email">Email *</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                            placeholder="usuario@exemplo.com"
+                            required={!editingProfile}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="password">Senha *</Label>
+                          <Input
+                            id="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            placeholder="Senha do usuário"
+                            required={!editingProfile}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
+                          <Input
+                            id="confirmPassword"
+                            type="password"
+                            value={formData.confirmPassword}
+                            onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                            placeholder="Confirme a senha"
+                            required={!editingProfile}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  
+                  {editingProfile && (
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({...formData, email: e.target.value})}
-                          placeholder="usuario@exemplo.com"
-                          required={!editingProfile}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="password">Senha *</Label>
+                        <Label htmlFor="password">Nova Senha (opcional)</Label>
                         <Input
                           id="password"
                           type="password"
                           value={formData.password}
                           onChange={(e) => setFormData({...formData, password: e.target.value})}
-                          placeholder="Senha do usuário"
-                          required={!editingProfile}
+                          placeholder="Deixe em branco para manter a senha atual"
                         />
                       </div>
-                    </div>
-                  )}
-                  
-                  {editingProfile && (
-                    <div className="grid gap-2">
-                      <Label htmlFor="password">Nova Senha (opcional)</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({...formData, password: e.target.value})}
-                        placeholder="Deixe em branco para manter a senha atual"
-                      />
+                      <div className="grid gap-2">
+                        <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          value={formData.confirmPassword}
+                          onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                          placeholder="Confirme a nova senha"
+                        />
+                      </div>
                     </div>
                   )}
                   
