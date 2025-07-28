@@ -8,128 +8,139 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Cores aconchegantes para produtos de sublimação */
-    --background: 35 25% 97%;
-    --foreground: 25 15% 15%;
+    /* Cores harmonizadas com o logo "Dias personalizados" */
+    --background: 30 35% 96%;          /* Bege claro cremoso */
+    --foreground: 20 10% 20%;          /* Marrom suave */
 
-    --card: 35 25% 99%;
-    --card-foreground: 25 15% 15%;
+    --card: 30 40% 98%;                /* Creme claro */
+    --card-foreground: 20 10% 20%;
 
-    --popover: 35 25% 99%;
-    --popover-foreground: 25 15% 15%;
+    --popover: 30 40% 98%;
+    --popover-foreground: 20 10% 20%;
 
-    /* Cores principais - tons terrosos e aconchegantes */
-    --primary: 25 85% 55%;          /* Terracota aconchegante */
-    --primary-foreground: 35 25% 97%;
+    /* Cores principais inspiradas no logo */
+    --primary: 15 75% 65%;             /* Rosa coral do logo */
+    --primary-foreground: 30 40% 98%;
 
-    --secondary: 35 35% 85%;        /* Bege suave */
-    --secondary-foreground: 25 25% 25%;
+    --secondary: 160 25% 75%;          /* Verde mint suave */
+    --secondary-foreground: 20 15% 25%;
 
-    --muted: 35 20% 90%;
-    --muted-foreground: 25 10% 45%;
+    --muted: 30 25% 90%;               /* Bege neutro */
+    --muted-foreground: 20 8% 50%;
 
-    --accent: 45 65% 65%;           /* Dourado suave */
-    --accent-foreground: 25 25% 25%;
+    --accent: 35 70% 70%;              /* Laranja suave do logo */
+    --accent-foreground: 20 15% 25%;
 
     --destructive: 0 70% 55%;
-    --destructive-foreground: 35 25% 97%;
+    --destructive-foreground: 30 40% 98%;
 
-    --border: 35 20% 88%;
-    --input: 35 20% 92%;
-    --ring: 25 85% 55%;
+    --border: 30 20% 85%;              /* Bordas suaves */
+    --input: 30 25% 92%;               /* Inputs claros */
+    --ring: 15 75% 65%;                /* Focus ring coral */
 
-    /* Cores específicas para sublimação */
-    --warm-coral: 15 75% 65%;       /* Coral quente */
-    --warm-coral-foreground: 35 25% 97%;
-    --sage-green: 120 25% 60%;      /* Verde salvia */
-    --sage-green-foreground: 35 25% 97%;
-    --dusty-rose: 340 40% 70%;      /* Rosa empoeirado */
-    --dusty-rose-foreground: 35 25% 97%;
-    --cream: 45 35% 92%;            /* Creme */
-    --cream-foreground: 25 25% 25%;
+    /* Paleta específica do logo "Dias personalizados" */
+    --coral-pink: 15 75% 65%;          /* Rosa coral principal */
+    --coral-pink-foreground: 30 40% 98%;
+    
+    --mint-green: 160 25% 75%;         /* Verde mint */
+    --mint-green-foreground: 20 15% 25%;
+    
+    --soft-orange: 35 70% 70%;         /* Laranja suave */
+    --soft-orange-foreground: 20 15% 25%;
+    
+    --warm-beige: 30 35% 85%;          /* Bege quente */
+    --warm-beige-foreground: 20 15% 25%;
+    
+    --cream-light: 35 45% 92%;         /* Creme claro */
+    --cream-light-foreground: 20 15% 25%;
 
-    /* Gradientes artesanais */
-    --gradient-primary: linear-gradient(135deg, hsl(25, 85%, 55%), hsl(15, 75%, 65%));
-    --gradient-secondary: linear-gradient(135deg, hsl(35, 35%, 85%), hsl(45, 35%, 92%));
-    --gradient-warm: linear-gradient(135deg, hsl(15, 75%, 65%), hsl(45, 65%, 65%));
-    --gradient-nature: linear-gradient(135deg, hsl(120, 25%, 60%), hsl(35, 35%, 85%));
+    /* Gradientes harmoniosos com o logo */
+    --gradient-primary: linear-gradient(135deg, hsl(15, 75%, 65%), hsl(35, 70%, 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(160, 25%, 75%), hsl(30, 35%, 85%));
+    --gradient-warm: linear-gradient(135deg, hsl(15, 75%, 65%), hsl(30, 35%, 85%));
+    --gradient-nature: linear-gradient(135deg, hsl(160, 25%, 75%), hsl(35, 45%, 92%));
+    --gradient-sunset: linear-gradient(135deg, hsl(35, 70%, 70%), hsl(15, 75%, 65%));
     
-    --success: 120 50% 45%;
-    --success-foreground: 35 25% 97%;
-    --warning: 45 85% 60%;
-    --warning-foreground: 25 25% 25%;
+    --success: 140 45% 55%;            /* Verde harmonioso */
+    --success-foreground: 30 40% 98%;
+    --warning: 45 80% 65%;             /* Amarelo suave */
+    --warning-foreground: 20 15% 25%;
     
-    /* Sombras suaves e aconchegantes */
-    --shadow-product: 0 8px 25px -8px hsl(25 85% 55% / 0.25);
-    --shadow-elegant: 0 15px 35px -5px hsl(25 15% 15% / 0.08), 0 5px 15px -3px hsl(25 15% 15% / 0.05);
-    --shadow-warm: 0 10px 30px -10px hsl(15 75% 65% / 0.3);
+    /* Sombras suaves inspiradas no design artesanal */
+    --shadow-product: 0 8px 25px -8px hsl(15 75% 65% / 0.15);
+    --shadow-elegant: 0 15px 35px -5px hsl(20 10% 20% / 0.06), 0 5px 15px -3px hsl(20 10% 20% / 0.04);
+    --shadow-warm: 0 10px 30px -10px hsl(15 75% 65% / 0.2);
+    --shadow-soft: 0 4px 20px -4px hsl(30 35% 85% / 0.3);
     
-    /* Transições suaves */
+    /* Transições suaves e orgânicas */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-organic: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
-    --radius: 0.75rem;
+    --radius: 1rem;                    /* Bordas mais arredondadas e suaves */
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar harmonizada */
+    --sidebar-background: 30 40% 98%;
+    --sidebar-foreground: 20 10% 20%;
+    --sidebar-primary: 15 75% 65%;
+    --sidebar-primary-foreground: 30 40% 98%;
+    --sidebar-accent: 30 25% 90%;
+    --sidebar-accent-foreground: 20 10% 20%;
+    --sidebar-border: 30 20% 85%;
+    --sidebar-ring: 15 75% 65%;
   }
 
   .dark {
-    /* Modo escuro aconchegante para produtos artesanais */
-    --background: 25 15% 8%;
-    --foreground: 35 25% 95%;
+    /* Modo escuro harmonizado com o logo */
+    --background: 20 15% 8%;           /* Marrom escuro suave */
+    --foreground: 30 40% 95%;
 
-    --card: 25 15% 10%;
-    --card-foreground: 35 25% 95%;
+    --card: 20 15% 10%;
+    --card-foreground: 30 40% 95%;
 
-    --popover: 25 15% 10%;
-    --popover-foreground: 35 25% 95%;
+    --popover: 20 15% 10%;
+    --popover-foreground: 30 40% 95%;
 
-    --primary: 25 75% 60%;
-    --primary-foreground: 25 15% 8%;
+    --primary: 15 70% 60%;             /* Rosa coral mais suave no escuro */
+    --primary-foreground: 20 15% 8%;
 
-    --secondary: 25 10% 18%;
-    --secondary-foreground: 35 25% 90%;
+    --secondary: 160 20% 65%;          /* Verde mint escuro */
+    --secondary-foreground: 30 40% 90%;
 
-    --muted: 25 10% 18%;
-    --muted-foreground: 35 15% 65%;
+    --muted: 20 10% 18%;
+    --muted-foreground: 30 20% 65%;
 
-    --accent: 45 55% 70%;
-    --accent-foreground: 25 15% 8%;
+    --accent: 35 65% 65%;              /* Laranja suave escuro */
+    --accent-foreground: 20 15% 8%;
 
     --destructive: 0 65% 55%;
-    --destructive-foreground: 35 25% 95%;
+    --destructive-foreground: 30 40% 95%;
 
-    --border: 25 10% 20%;
-    --input: 25 10% 20%;
-    --ring: 25 75% 60%;
+    --border: 20 10% 20%;
+    --input: 20 10% 20%;
+    --ring: 15 70% 60%;
 
-    /* Cores específicas modo escuro */
-    --warm-coral: 15 65% 60%;
-    --sage-green: 120 20% 55%;
-    --dusty-rose: 340 35% 65%;
-    --cream: 45 25% 85%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Cores específicas do logo no modo escuro */
+    --coral-pink: 15 70% 60%;
+    --coral-pink-foreground: 20 15% 8%;
+    --mint-green: 160 20% 65%;
+    --mint-green-foreground: 20 15% 8%;
+    --soft-orange: 35 65% 65%;
+    --soft-orange-foreground: 20 15% 8%;
+    --warm-beige: 30 25% 75%;
+    --warm-beige-foreground: 20 15% 8%;
+    --cream-light: 35 35% 80%;
+    --cream-light-foreground: 20 15% 8%;
+
+    /* Sidebar escura harmonizada */
+    --sidebar-background: 20 15% 10%;
+    --sidebar-foreground: 30 40% 95%;
+    --sidebar-primary: 15 70% 60%;
+    --sidebar-primary-foreground: 20 15% 8%;
+    --sidebar-accent: 20 10% 18%;
+    --sidebar-accent-foreground: 30 40% 90%;
+    --sidebar-border: 20 10% 20%;
+    --sidebar-ring: 15 70% 60%;
   }
 }
 
@@ -154,16 +165,16 @@ All colors MUST be HSL.
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-primary to-warm-coral bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-coral-pink to-soft-orange bg-clip-text text-transparent;
   }
   
   .glass-effect {
     @apply bg-background/80 backdrop-blur-md border border-border/50;
   }
   
-  /* Estilos para produtos */
+  /* Estilos para produtos harmonizados com o logo */
   .product-card {
-    @apply bg-card/80 backdrop-blur-sm border-0 transition-all duration-300 hover:shadow-product hover:scale-[1.02];
+    @apply bg-card/90 backdrop-blur-sm border border-border/30 transition-all duration-300 hover:shadow-soft hover:scale-[1.02] hover:border-coral-pink/20;
   }
   
   /* Layout responsivo */
@@ -171,13 +182,21 @@ All colors MUST be HSL.
     @apply container mx-auto px-4 sm:px-6 lg:px-8;
   }
   
-  /* Botões customizados */
+  /* Botões inspirados no logo */
   .btn-gradient {
-    @apply bg-gradient-to-r from-primary to-warm-coral hover:from-primary/90 hover:to-warm-coral/90 text-primary-foreground;
+    @apply bg-gradient-to-r from-coral-pink to-soft-orange hover:from-coral-pink/90 hover:to-soft-orange/90 text-coral-pink-foreground shadow-warm;
   }
   
   .btn-outline-warm {
-    @apply border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground;
+    @apply border-2 border-coral-pink text-coral-pink hover:bg-coral-pink hover:text-coral-pink-foreground transition-all duration-300;
+  }
+  
+  .btn-mint {
+    @apply bg-mint-green text-mint-green-foreground hover:bg-mint-green/90 transition-colors duration-300;
+  }
+  
+  .btn-soft {
+    @apply bg-warm-beige text-warm-beige-foreground hover:bg-warm-beige/80 transition-colors duration-300;
   }
 }
 

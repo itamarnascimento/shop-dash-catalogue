@@ -64,21 +64,26 @@ export default {
 					DEFAULT: 'hsl(var(--warning))',
 					foreground: 'hsl(var(--warning-foreground))'
 				},
-				'warm-coral': {
-					DEFAULT: 'hsl(var(--warm-coral))',
-					foreground: 'hsl(var(--warm-coral-foreground))'
+				/* Cores inspiradas no logo "Dias personalizados" */
+				'coral-pink': {
+					DEFAULT: 'hsl(var(--coral-pink))',
+					foreground: 'hsl(var(--coral-pink-foreground))'
 				},
-				'sage-green': {
-					DEFAULT: 'hsl(var(--sage-green))',
-					foreground: 'hsl(var(--sage-green-foreground))'
+				'mint-green': {
+					DEFAULT: 'hsl(var(--mint-green))',
+					foreground: 'hsl(var(--mint-green-foreground))'
 				},
-				'dusty-rose': {
-					DEFAULT: 'hsl(var(--dusty-rose))',
-					foreground: 'hsl(var(--dusty-rose-foreground))'
+				'soft-orange': {
+					DEFAULT: 'hsl(var(--soft-orange))',
+					foreground: 'hsl(var(--soft-orange-foreground))'
 				},
-				cream: {
-					DEFAULT: 'hsl(var(--cream))',
-					foreground: 'hsl(var(--cream-foreground))'
+				'warm-beige': {
+					DEFAULT: 'hsl(var(--warm-beige))',
+					foreground: 'hsl(var(--warm-beige-foreground))'
+				},
+				'cream-light': {
+					DEFAULT: 'hsl(var(--cream-light))',
+					foreground: 'hsl(var(--cream-light-foreground))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -133,7 +138,8 @@ export default {
 			boxShadow: {
 				'warm': 'var(--shadow-warm)',
 				'elegant': 'var(--shadow-elegant)',
-				'product': 'var(--shadow-product)'
+				'product': 'var(--shadow-product)',
+				'soft': 'var(--shadow-soft)'
 			}
 		}
 	},
