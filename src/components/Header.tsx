@@ -120,12 +120,18 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
                             Gerenciar Categorias
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link to="/admin/users">
-                            <Settings className="w-4 h-4 mr-2" />
-                            Gerenciar Usuários
-                          </Link>
-                        </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                           <Link to="/admin/users">
+                             <Settings className="w-4 h-4 mr-2" />
+                             Gerenciar Usuários
+                           </Link>
+                         </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                           <Link to="/admin/orders">
+                             <Settings className="w-4 h-4 mr-2" />
+                             Gerenciar Pedidos
+                           </Link>
+                         </DropdownMenuItem>
                       </>
                     )}
                     <DropdownMenuSeparator />

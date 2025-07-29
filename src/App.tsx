@@ -15,6 +15,9 @@ import OrderHistory from "./pages/OrderHistory";
 import ProductManagement from "./pages/ProductManagement";
 import UserManagement from "./pages/UserManagement";
 import CategoryManagement from "./pages/CategoryManagement";
+import OrderManagement from "./pages/OrderManagement";
+import OrderReports from "./pages/OrderReports";
+import OrderDetail from "./pages/OrderDetail";
 import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
@@ -34,21 +37,36 @@ const App = () => (
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/orders" element={<OrderHistory />} />
-              <Route path="/admin/products" element={
-                <ProtectedAdminRoute>
-                  <ProductManagement />
-                </ProtectedAdminRoute>
-              } />
-              <Route path="/admin/users" element={
-                <ProtectedAdminRoute>
-                  <UserManagement />
-                </ProtectedAdminRoute>
-              } />
-              <Route path="/admin/categories" element={
-                <ProtectedAdminRoute>
-                  <CategoryManagement />
-                </ProtectedAdminRoute>
-              } />
+          <Route path="/admin/products" element={
+            <ProtectedAdminRoute>
+              <ProductManagement />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/users" element={
+            <ProtectedAdminRoute>
+              <UserManagement />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/categories" element={
+            <ProtectedAdminRoute>
+              <CategoryManagement />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/orders" element={
+            <ProtectedAdminRoute>
+              <OrderManagement />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/order-reports" element={
+            <ProtectedAdminRoute>
+              <OrderReports />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/orders/:orderId" element={
+            <ProtectedAdminRoute>
+              <OrderDetail />
+            </ProtectedAdminRoute>
+          } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
