@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Wishlist from "./pages/Wishlist";
 import OrderHistory from "./pages/OrderHistory";
+import DeliveryAddresses from "./pages/DeliveryAddresses";
 import ProductManagement from "./pages/ProductManagement";
 import UserManagement from "./pages/UserManagement";
 import CategoryManagement from "./pages/CategoryManagement";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/orders" element={<OrderHistory />} />
+              <Route path="/addresses" element={<DeliveryAddresses />} />
           <Route path="/admin/products" element={
             <ProtectedAdminRoute>
               <ProductManagement />

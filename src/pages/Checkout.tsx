@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard, MapPin, User } from 'lucide-react';
+import { ArrowLeft, CreditCard, MapPin, User, Plus, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +19,9 @@ const Checkout: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [useNewAddress, setUseNewAddress] = useState(false);
   
   const [shippingAddress, setShippingAddress] = useState({
     name: '',
@@ -26,6 +31,73 @@ const Checkout: React.FC = () => {
     zip_code: '',
     phone: '',
   });
+
+  useEffect(() => {
+    loadSavedAddresses();
+  }, [user]);
+
+  const loadSavedAddresses = async () => {
+    if (!user) return;
+    
+    try {
+      const response = await fetch(`https://vrenmohimskinepiwufd.supabase.co/rest/v1/delivery_addresses?user_id=eq.${user.id}&order=is_default.desc,created_at.desc`, {
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyZW5tb2hpbXNraW5lcGl3dWZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjIwMDQsImV4cCI6MjA2ODkzODAwNH0.k49A6Kfub5z1ZuctFARYs53LZmxyfjuTlLZf-bvUvA0',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const addresses = await response.json();
+        setSavedAddresses(addresses);
+        
+        // Selecionar automaticamente o endereço padrão se existir
+        const defaultAddress = addresses.find(addr => addr.is_default);
+        if (defaultAddress && !useNewAddress) {
+          setSelectedAddressId(defaultAddress.id);
+          setShippingAddress({
+            name: defaultAddress.recipient_name,
+            street: defaultAddress.street,
+            city: defaultAddress.city,
+            state: defaultAddress.state,
+            zip_code: defaultAddress.zip_code,
+            phone: defaultAddress.phone,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar endereços:', error);
+    }
+  };
+
+  const handleAddressSelect = (addressId) => {
+    if (addressId === 'new') {
+      setUseNewAddress(true);
+      setSelectedAddressId('');
+      setShippingAddress({
+        name: '',
+        street: '',
+        city: '',
+        state: '',
+        zip_code: '',
+        phone: '',
+      });
+    } else {
+      setUseNewAddress(false);
+      setSelectedAddressId(addressId);
+      const address = savedAddresses.find(addr => addr.id === addressId);
+      if (address) {
+        setShippingAddress({
+          name: address.recipient_name,
+          street: address.street,
+          city: address.city,
+          state: address.state,
+          zip_code: address.zip_code,
+          phone: address.phone,
+        });
+      }
+    }
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -188,68 +260,103 @@ const Checkout: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nome Completo *</Label>
-                <Input
-                  id="name"
-                  value={shippingAddress.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="Digite seu nome completo"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="street">Endereço *</Label>
-                <Input
-                  id="street"
-                  value={shippingAddress.street}
-                  onChange={(e) => handleInputChange('street', e.target.value)}
-                  placeholder="Rua, número, complemento"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
+              {/* Seletor de Endereços */}
+              {savedAddresses.length > 0 && (
                 <div>
-                  <Label htmlFor="city">Cidade *</Label>
-                  <Input
-                    id="city"
-                    value={shippingAddress.city}
-                    onChange={(e) => handleInputChange('city', e.target.value)}
-                    placeholder="Cidade"
-                  />
+                  <Label>Escolher Endereço</Label>
+                  <Select value={selectedAddressId || 'new'} onValueChange={handleAddressSelect}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um endereço" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new">
+                        <div className="flex items-center gap-2">
+                          <Plus className="w-4 h-4" />
+                          Novo endereço
+                        </div>
+                      </SelectItem>
+                      {savedAddresses.map((address) => (
+                        <SelectItem key={address.id} value={address.id}>
+                          <div>
+                            <div className="font-medium">{address.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {address.street}, {address.city}
+                            </div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <Label htmlFor="state">Estado *</Label>
-                  <Input
-                    id="state"
-                    value={shippingAddress.state}
-                    onChange={(e) => handleInputChange('state', e.target.value)}
-                    placeholder="UF"
-                    maxLength={2}
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="zip_code">CEP *</Label>
-                  <Input
-                    id="zip_code"
-                    value={shippingAddress.zip_code}
-                    onChange={(e) => handleInputChange('zip_code', e.target.value)}
-                    placeholder="00000-000"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Telefone *</Label>
-                  <Input
-                    id="phone"
-                    value={shippingAddress.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="(00) 00000-0000"
-                  />
-                </div>
-              </div>
+              )}
+
+              {/* Campos do formulário (mostrar apenas se for novo endereço ou não houver endereços salvos) */}
+              {(useNewAddress || savedAddresses.length === 0) && (
+                <>
+                  <div>
+                    <Label htmlFor="name">Nome Completo *</Label>
+                    <Input
+                      id="name"
+                      value={shippingAddress.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      placeholder="Digite seu nome completo"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="street">Endereço *</Label>
+                    <Input
+                      id="street"
+                      value={shippingAddress.street}
+                      onChange={(e) => handleInputChange('street', e.target.value)}
+                      placeholder="Rua, número, complemento"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="city">Cidade *</Label>
+                      <Input
+                        id="city"
+                        value={shippingAddress.city}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        placeholder="Cidade"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="state">Estado *</Label>
+                      <Input
+                        id="state"
+                        value={shippingAddress.state}
+                        onChange={(e) => handleInputChange('state', e.target.value)}
+                        placeholder="UF"
+                        maxLength={2}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="zip_code">CEP *</Label>
+                      <Input
+                        id="zip_code"
+                        value={shippingAddress.zip_code}
+                        onChange={(e) => handleInputChange('zip_code', e.target.value)}
+                        placeholder="00000-000"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Telefone *</Label>
+                      <Input
+                        id="phone"
+                        value={shippingAddress.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        placeholder="(00) 00000-0000"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
