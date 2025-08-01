@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Calendar, MapPin, CreditCard } from 'lucide-react';
+import { Package, Calendar, MapPin, CreditCard, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Order, OrderItem } from '@/types/database';
+import { useToast } from '@/hooks/use-toast';
 
 interface OrderWithItems {
   id: string;
@@ -27,7 +29,9 @@ interface OrderWithItems {
 const OrderHistory: React.FC = () => {
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingOrder, setUpdatingOrder] = useState<string | null>(null);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -86,6 +90,39 @@ const OrderHistory: React.FC = () => {
     }
   };
 
+  const markAsDelivered = async (orderId: string) => {
+    try {
+      setUpdatingOrder(orderId);
+      
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: 'delivered' })
+        .eq('id', orderId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      // Atualizar o estado local
+      setOrders(orders.map(order => 
+        order.id === orderId ? { ...order, status: 'delivered' } : order
+      ));
+
+      toast({
+        title: "Pedido marcado como entregue",
+        description: "Obrigado por confirmar o recebimento do seu pedido!",
+      });
+    } catch (error) {
+      console.error('Erro ao marcar pedido como entregue:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível marcar o pedido como entregue. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingOrder(null);
+    }
+  };
+
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -138,9 +175,22 @@ const OrderHistory: React.FC = () => {
                     <Package className="h-5 w-5" />
                     Pedido #{order.id.slice(0, 8)}
                   </CardTitle>
-                  <Badge className={getStatusColor(order.status)}>
-                    {getStatusText(order.status)}
-                  </Badge>
+                  <div className="flex items-center gap-3">
+                    <Badge className={getStatusColor(order.status)}>
+                      {getStatusText(order.status)}
+                    </Badge>
+                    {order.status === 'shipped' && (
+                      <Button
+                        size="sm"
+                        onClick={() => markAsDelivered(order.id)}
+                        disabled={updatingOrder === order.id}
+                        className="bg-success hover:bg-success/90 text-success-foreground"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        {updatingOrder === order.id ? 'Confirmando...' : 'Marcar como entregue'}
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
