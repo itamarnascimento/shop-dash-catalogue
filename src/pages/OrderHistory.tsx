@@ -84,7 +84,7 @@ const OrderHistory: React.FC = () => {
       case 'pending': return 'Pendente';
       case 'processing': return 'Processando';
       case 'shipped': return 'Enviado';
-      case 'delivered': return 'Entregue';
+      case 'delivered': return 'Recebido';
       case 'cancelled': return 'Cancelado';
       default: return 'Desconhecido';
     }
@@ -108,14 +108,14 @@ const OrderHistory: React.FC = () => {
       ));
 
       toast({
-        title: "Pedido marcado como entregue",
+        title: "Pedido marcado como recebido",
         description: "Obrigado por confirmar o recebimento do seu pedido!",
       });
     } catch (error) {
-      console.error('Erro ao marcar pedido como entregue:', error);
+      console.error('Erro ao marcar pedido como recebido:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível marcar o pedido como entregue. Tente novamente.",
+        description: "Não foi possível marcar o pedido como recebido. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -187,7 +187,7 @@ const OrderHistory: React.FC = () => {
                         className="bg-success hover:bg-success/90 text-success-foreground"
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
-                        {updatingOrder === order.id ? 'Confirmando...' : 'Marcar como entregue'}
+                        {updatingOrder === order.id ? 'Confirmando...' : 'Marcar como recebido'}
                       </Button>
                     )}
                   </div>
