@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, Zap } from 'lucide-react';
-import heroBanner from '@/assets/hero-banner.jpg';
+import HeroCarousel from '@/components/HeroCarousel';
 
 const HeroSection: React.FC = () => {
   return (
@@ -61,15 +61,10 @@ const HeroSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Image */}
+          {/* Image Carousel */}
           <div className="relative">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-              <img
-                src={heroBanner}
-                alt="Produtos em destaque"
-                className="w-full h-[600px] object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
+            <div className="relative shadow-2xl">
+              <HeroCarousel />
             </div>
             
             {/* Floating card */}
