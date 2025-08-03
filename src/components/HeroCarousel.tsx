@@ -1,25 +1,23 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 
-const carouselImages = [
-  {
-    url: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=800&q=80',
-    alt: 'Mulher usando laptop - tecnologia no dia a dia'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=800&q=80', 
-    alt: 'Laptop moderno - produtividade e inovação'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=800&q=80',
-    alt: 'Código colorido - desenvolvimento e tecnologia'
-  }
-];
+interface CarouselImage {
+  id: string;
+  url: string;
+  alt_text: string;
+  title?: string;
+  order_position: number;
+  is_active: boolean;
+}
 
 const HeroCarousel: React.FC = () => {
+  const [images, setImages] = useState<CarouselImage[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { 
       loop: true,
@@ -28,6 +26,36 @@ const HeroCarousel: React.FC = () => {
     [Autoplay({ delay: 4000, stopOnInteraction: false })]
   );
 
+  useEffect(() => {
+    loadImages();
+  }, []);
+
+  const loadImages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('carousel_images')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_position', { ascending: true });
+
+      if (error) throw error;
+      setImages(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar imagens do carrossel:', error);
+      // Fallback para imagens estáticas em caso de erro
+      setImages([
+        {
+          id: '1',
+          url: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=800&q=80',
+          alt_text: 'Mulher usando laptop - tecnologia no dia a dia',
+          title: 'Tecnologia no Dia a Dia',
+          order_position: 1,
+          is_active: true
+        }
+      ]);
+    }
+  };
+
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
   }, [emblaApi]);
@@ -35,8 +63,6 @@ const HeroCarousel: React.FC = () => {
   const scrollNext = useCallback(() => {
     if (emblaApi) emblaApi.scrollNext();
   }, [emblaApi]);
-
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -53,11 +79,11 @@ const HeroCarousel: React.FC = () => {
     <div className="relative">
       <div className="overflow-hidden rounded-2xl" ref={emblaRef}>
         <div className="flex">
-          {carouselImages.map((image, index) => (
-            <div key={index} className="flex-[0_0_100%] min-w-0">
+          {images.map((image, index) => (
+            <div key={image.id} className="flex-[0_0_100%] min-w-0">
               <img
                 src={image.url}
-                alt={image.alt}
+                alt={image.alt_text}
                 className="w-full h-[600px] object-cover"
               />
             </div>
@@ -86,7 +112,7 @@ const HeroCarousel: React.FC = () => {
 
       {/* Indicators */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-        {carouselImages.map((_, index) => (
+        {images.map((_, index) => (
           <button
             key={index}
             className={`w-2 h-2 rounded-full transition-all ${

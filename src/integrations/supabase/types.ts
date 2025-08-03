@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      carousel_images: {
+        Row: {
+          alt_text: string
+          created_at: string
+          id: string
+          is_active: boolean
+          order_position: number
+          title: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          alt_text: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          order_position?: number
+          title?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          alt_text?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          order_position?: number
+          title?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -62,6 +95,51 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      delivery_addresses: {
+        Row: {
+          city: string
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          phone: string
+          recipient_name: string
+          state: string
+          street: string
+          updated_at: string
+          user_id: string
+          zip_code: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          phone: string
+          recipient_name: string
+          state: string
+          street: string
+          updated_at?: string
+          user_id: string
+          zip_code: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          phone?: string
+          recipient_name?: string
+          state?: string
+          street?: string
+          updated_at?: string
+          user_id?: string
+          zip_code?: string
         }
         Relationships: []
       }
