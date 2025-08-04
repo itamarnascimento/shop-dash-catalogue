@@ -76,3 +76,18 @@ export interface ReviewWithProfile extends Review {
     nome_completo?: string;
   };
 }
+
+export interface Coupon {
+  id: string;
+  code: string;
+  description?: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  minimum_order_value: number;
+  max_uses?: number;
+  current_uses: number;
+  is_active: boolean;
+  expires_at?: string;
+  created_at: string;
+  updated_at: string;
+}

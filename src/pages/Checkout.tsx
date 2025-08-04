@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard, MapPin, User, Plus, Check } from 'lucide-react';
+import { ArrowLeft, CreditCard, MapPin, User, Plus, Check, Tag, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,13 +15,14 @@ import { supabase } from '@/integrations/supabase/client';
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
-  const { items, getTotalPrice, clearCart } = useCart();
+  const { items, getTotalPrice, clearCart, appliedCoupon, applyCoupon, removeCoupon, getDiscountAmount, getFinalPrice } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [useNewAddress, setUseNewAddress] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
   
   const [shippingAddress, setShippingAddress] = useState({
     name: '',
@@ -160,7 +161,7 @@ const Checkout: React.FC = () => {
         .from('orders')
         .insert({
           user_id: user.id,
-          total_amount: getTotalPrice(),
+          total_amount: getFinalPrice(),
           shipping_address: shippingAddress,
           status: 'pending'
         })
@@ -392,12 +393,61 @@ const Checkout: React.FC = () => {
 
                 <Separator />
 
+                {/* Seção de Cupons */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4" />
+                    <Label>Cupom de Desconto</Label>
+                  </div>
+                  
+                  {appliedCoupon ? (
+                    <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div>
+                        <div className="font-medium text-green-800">{appliedCoupon.code}</div>
+                        <div className="text-sm text-green-600">{appliedCoupon.description}</div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={removeCoupon}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Digite o código do cupom"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => applyCoupon(couponCode)}
+                        disabled={!couponCode.trim()}
+                      >
+                        Aplicar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
                 {/* Totais */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal:</span>
                     <span>{formatPrice(getTotalPrice())}</span>
                   </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Desconto ({appliedCoupon.code}):</span>
+                      <span>-{formatPrice(getDiscountAmount())}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span>Frete:</span>
                     <span className="text-green-600">Grátis</span>
@@ -405,7 +455,7 @@ const Checkout: React.FC = () => {
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total:</span>
-                    <span>{formatPrice(getTotalPrice())}</span>
+                    <span>{formatPrice(getFinalPrice())}</span>
                   </div>
                 </div>
 

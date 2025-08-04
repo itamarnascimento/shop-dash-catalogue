@@ -23,4 +23,9 @@ export interface CartContextType {
   clearCart: () => void;
   getTotalPrice: () => number;
   getTotalItems: () => number;
+  appliedCoupon: any;
+  applyCoupon: (couponCode: string) => Promise<boolean>;
+  removeCoupon: () => void;
+  getDiscountAmount: () => number;
+  getFinalPrice: () => number;
 }

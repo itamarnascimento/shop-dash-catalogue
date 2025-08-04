@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState } from 'react';
 import { CartItem, Product, CartContextType } from '@/types/product';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { Coupon } from '@/types/database';
 
 type CartAction =
   | { type: 'ADD_TO_CART'; product: Product }
@@ -51,6 +52,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [items, dispatch] = useReducer(cartReducer, []);
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -193,6 +195,98 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return items.reduce((total, item) => total + item.quantity, 0);
   };
 
+  // Funções para cupons
+  const applyCoupon = async (couponCode: string) => {
+    try {
+      const { data: coupon, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', couponCode.toUpperCase())
+        .eq('is_active', true)
+        .single();
+
+      if (error || !coupon) {
+        toast({
+          title: "Cupom inválido",
+          description: "Cupom não encontrado ou inativo",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Verificar se não expirou
+      if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+        toast({
+          title: "Cupom expirado",
+          description: "Este cupom não é mais válido",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Verificar valor mínimo do pedido
+      const subtotal = getTotalPrice();
+      if (subtotal < coupon.minimum_order_value) {
+        toast({
+          title: "Valor mínimo não atingido",
+          description: `Pedido mínimo de R$ ${coupon.minimum_order_value.toFixed(2)} para usar este cupom`,
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Verificar limite de uso
+      if (coupon.max_uses && coupon.current_uses >= coupon.max_uses) {
+        toast({
+          title: "Cupom esgotado",
+          description: "Este cupom já atingiu o limite de uso",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      setAppliedCoupon(coupon as Coupon);
+      toast({
+        title: "Cupom aplicado!",
+        description: `Desconto de ${coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `R$ ${coupon.discount_value.toFixed(2)}`} aplicado`,
+      });
+      return true;
+    } catch (error) {
+      console.error('Erro ao aplicar cupom:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível aplicar o cupom",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    toast({
+      title: "Cupom removido",
+      description: "O desconto foi removido do seu pedido",
+    });
+  };
+
+  const getDiscountAmount = () => {
+    if (!appliedCoupon) return 0;
+    
+    const subtotal = getTotalPrice();
+    if (appliedCoupon.discount_type === 'percentage') {
+      return (subtotal * appliedCoupon.discount_value) / 100;
+    } else {
+      return Math.min(appliedCoupon.discount_value, subtotal);
+    }
+  };
+
+  const getFinalPrice = () => {
+    const subtotal = getTotalPrice();
+    const discount = getDiscountAmount();
+    return Math.max(0, subtotal - discount);
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -203,6 +297,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         clearCart,
         getTotalPrice,
         getTotalItems,
+        appliedCoupon,
+        applyCoupon,
+        removeCoupon,
+        getDiscountAmount,
+        getFinalPrice,
       }}
     >
       {children}

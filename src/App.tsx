@@ -21,6 +21,7 @@ import OrderReports from "./pages/OrderReports";
 import OrderDetail from "./pages/OrderDetail";
 import Checkout from "./pages/Checkout";
 import CarouselManagement from "./pages/CarouselManagement";
+import CouponManagement from "./pages/CouponManagement";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,11 @@ const App = () => (
           <Route path="/admin/carousel" element={
             <ProtectedAdminRoute>
               <CarouselManagement />
+            </ProtectedAdminRoute>
+          } />
+          <Route path="/admin/coupons" element={
+            <ProtectedAdminRoute>
+              <CouponManagement />
             </ProtectedAdminRoute>
           } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
