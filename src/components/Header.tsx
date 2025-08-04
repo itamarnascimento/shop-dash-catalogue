@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, Search, User, LogOut, Heart, Package, Settings, MapPin, Images } from 'lucide-react';
+import { ShoppingCart, Search, User, LogOut, Heart, Package, Settings, MapPin, Images, Tag } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -142,6 +142,12 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
                            <Link to="/admin/carousel">
                              <Images className="w-4 h-4 mr-2" />
                              Gerenciar Carrossel
+                           </Link>
+                         </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                           <Link to="/admin/coupons">
+                             <Tag className="w-4 h-4 mr-2" />
+                             Gerenciar Cupons
                            </Link>
                          </DropdownMenuItem>
                       </>
