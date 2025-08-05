@@ -10,6 +10,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import NotificationPreferences from "./pages/NotificationPreferences";
 import Wishlist from "./pages/Wishlist";
 import OrderHistory from "./pages/OrderHistory";
 import DeliveryAddresses from "./pages/DeliveryAddresses";
@@ -40,7 +41,8 @@ const App = () => (
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/orders" element={<OrderHistory />} />
-              <Route path="/addresses" element={<DeliveryAddresses />} />
+          <Route path="/addresses" element={<DeliveryAddresses />} />
+          <Route path="/notifications" element={<NotificationPreferences />} />
           <Route path="/admin/products" element={
             <ProtectedAdminRoute>
               <ProductManagement />

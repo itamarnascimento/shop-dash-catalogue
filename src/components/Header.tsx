@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, Search, User, LogOut, Heart, Package, Settings, MapPin, Images, Tag } from 'lucide-react';
+import { ShoppingCart, Search, User, LogOut, Heart, Package, Settings, MapPin, Images, Tag, Bell } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 interface HeaderProps {
   onSearchChange: (query: string) => void;
@@ -51,6 +52,9 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
           <div className="flex items-center space-x-2">
             {user ? (
               <>
+                {/* Notification Center */}
+                <NotificationCenter />
+                
                 {/* Navigation Links */}
                 <nav className="hidden md:flex items-center space-x-1 mr-4">
                   <Button 
