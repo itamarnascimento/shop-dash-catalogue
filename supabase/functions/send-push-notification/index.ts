@@ -222,6 +222,14 @@ serve(async (req) => {
         message: 'Notificações processadas',
         successful,
         failed,
+        push_results: {
+          successful: pushResults.filter(r => r.success).length,
+          failed: pushResults.filter(r => !r.success).length
+        },
+        email_results: {
+          successful: emailResults.filter(r => r.success).length,
+          failed: emailResults.filter(r => !r.success).length
+        },
         details: results,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

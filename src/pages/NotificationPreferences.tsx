@@ -14,6 +14,7 @@ interface NotificationPreferences {
   order_updates: boolean;
   promotions: boolean;
   general: boolean;
+  email_notifications: boolean;
 }
 
 const NotificationPreferences: React.FC = () => {
