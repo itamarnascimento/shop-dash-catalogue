@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.52.1';
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,10 +25,12 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
     const vapidPublicKey = 'BKWZrj4xyffEHfCr6_pC1vJT4xPKT5nXPB3-QqW_2--9T-1X-4eF-4eF-4eF-4eF-4eF-4eF-4eF-4eF-4eF-4eF';
     const vapidPrivateKey = 'example-private-key'; // Em produção, use uma chave real
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
     const { user_id, title, body, type = 'general', data = {}, send_to_all = false }: NotificationPayload = await req.json();
 
@@ -38,7 +41,7 @@ serve(async (req) => {
       );
     }
 
-    // Buscar subscrições
+    // Buscar subscrições push
     let subscriptionsQuery = supabase
       .from('push_subscriptions')
       .select('*')
@@ -54,10 +57,38 @@ serve(async (req) => {
       throw subscriptionsError;
     }
 
-    if (!subscriptions || subscriptions.length === 0) {
-      console.log('Nenhuma subscrição ativa encontrada');
+    // Buscar usuários para envio de email
+    let usersToEmail = [];
+    if (resend) {
+      let usersQuery;
+      if (send_to_all) {
+        usersQuery = supabase
+          .from('profiles')
+          .select('user_id, email')
+          .not('email', 'is', null);
+      } else if (user_id) {
+        usersQuery = supabase
+          .from('profiles')
+          .select('user_id, email')
+          .eq('user_id', user_id)
+          .not('email', 'is', null);
+      }
+
+      if (usersQuery) {
+        const { data: users, error: usersError } = await usersQuery;
+        if (!usersError && users) {
+          usersToEmail = users;
+        }
+      }
+    }
+
+    const hasPushSubscriptions = subscriptions && subscriptions.length > 0;
+    const hasEmailTargets = usersToEmail.length > 0;
+
+    if (!hasPushSubscriptions && !hasEmailTargets) {
+      console.log('Nenhuma subscrição ativa ou email encontrado');
       return new Response(
-        JSON.stringify({ message: 'Nenhuma subscrição ativa encontrada' }),
+        JSON.stringify({ message: 'Nenhuma subscrição ativa ou email encontrado' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -81,12 +112,12 @@ serve(async (req) => {
       ] : [],
     };
 
-    // Enviar notificações para cada subscrição
-    const promises = subscriptions.map(async (subscription) => {
+    // Enviar notificações push
+    const pushPromises = hasPushSubscriptions ? subscriptions.map(async (subscription) => {
       try {
         // Aqui você usaria uma biblioteca real de web push como 'web-push'
         // Por simplicidade, vou simular o envio
-        console.log(`Enviando notificação para: ${subscription.endpoint}`);
+        console.log(`Enviando notificação push para: ${subscription.endpoint}`);
         
         // Em produção, você usaria:
         // const result = await webpush.sendNotification(
@@ -108,11 +139,11 @@ serve(async (req) => {
         // );
 
         // Por enquanto, apenas logamos
-        console.log('Notificação simulada enviada com sucesso');
+        console.log('Notificação push simulada enviada com sucesso');
         
-        return { success: true, subscription_id: subscription.id };
+        return { success: true, type: 'push', subscription_id: subscription.id };
       } catch (error) {
-        console.error(`Erro ao enviar para ${subscription.endpoint}:`, error);
+        console.error(`Erro ao enviar push para ${subscription.endpoint}:`, error);
         
         // Se o endpoint não é mais válido, marcar como inativo
         if (error.statusCode === 410) {
@@ -122,13 +153,55 @@ serve(async (req) => {
             .eq('id', subscription.id);
         }
         
-        return { success: false, subscription_id: subscription.id, error: error.message };
+        return { success: false, type: 'push', subscription_id: subscription.id, error: error.message };
       }
-    });
+    }) : [];
 
-    const results = await Promise.all(promises);
+    // Enviar emails
+    const emailPromises = hasEmailTargets && resend ? usersToEmail.map(async (user) => {
+      try {
+        console.log(`Enviando email para: ${user.email}`);
+        
+        const emailResponse = await resend.emails.send({
+          from: 'Notificações <onboarding@resend.dev>',
+          to: [user.email],
+          subject: title,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #333; margin-bottom: 20px;">${title}</h2>
+              <p style="color: #666; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
+                ${body}
+              </p>
+              ${type === 'order_update' ? `
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                  <p style="margin: 0; color: #666; font-size: 14px;">
+                    Esta é uma atualização automática sobre seu pedido. Acesse sua conta para mais detalhes.
+                  </p>
+                </div>
+              ` : ''}
+              <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+              <p style="color: #999; font-size: 12px; margin: 0;">
+                Você está recebendo este email porque optou por receber notificações.
+              </p>
+            </div>
+          `,
+        });
+
+        console.log('Email enviado com sucesso:', emailResponse);
+        
+        return { success: true, type: 'email', user_id: user.user_id, email: user.email };
+      } catch (error) {
+        console.error(`Erro ao enviar email para ${user.email}:`, error);
+        return { success: false, type: 'email', user_id: user.user_id, email: user.email, error: error.message };
+      }
+    }) : [];
+
+    const allPromises = [...pushPromises, ...emailPromises];
+    const results = await Promise.all(allPromises);
     const successful = results.filter(r => r.success).length;
     const failed = results.filter(r => !r.success).length;
+    const pushResults = results.filter(r => r.type === 'push');
+    const emailResults = results.filter(r => r.type === 'email');
 
     // Salvar notificação no histórico se for para usuário específico
     if (user_id && !send_to_all) {
