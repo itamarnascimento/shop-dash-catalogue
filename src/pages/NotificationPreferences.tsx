@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Save, Smartphone } from 'lucide-react';
+import { Bell, Save, Smartphone, Mail } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ const NotificationPreferences: React.FC = () => {
     order_updates: true,
     promotions: true,
     general: true,
+    email_notifications: true,
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -52,6 +53,7 @@ const NotificationPreferences: React.FC = () => {
           order_updates: data.order_updates,
           promotions: data.promotions,
           general: data.general,
+          email_notifications: data.email_notifications ?? true,
         });
       }
     } catch (error) {
@@ -183,6 +185,33 @@ const NotificationPreferences: React.FC = () => {
             >
               Enviar Notificação de Teste
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Email Notifications */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Mail className="w-5 h-5" />
+              <CardTitle>Notificações por Email</CardTitle>
+            </div>
+            <CardDescription>
+              Receba notificações diretamente no seu email.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-base font-medium">Ativar Notificações por Email</Label>
+                <p className="text-sm text-muted-foreground">
+                  Permite que você receba notificações por email além das notificações push.
+                </p>
+              </div>
+              <Switch
+                checked={preferences.email_notifications}
+                onCheckedChange={(checked) => updatePreference('email_notifications', checked)}
+              />
+            </div>
           </CardContent>
         </Card>
 

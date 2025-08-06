@@ -62,14 +62,25 @@ serve(async (req) => {
     if (resend) {
       let usersQuery;
       if (send_to_all) {
+        // Para todos: buscar usuários com email e preferências de email ativadas
         usersQuery = supabase
           .from('profiles')
-          .select('user_id, email')
-          .not('email', 'is', null);
+          .select(`
+            user_id, 
+            email,
+            notification_preferences!inner(email_notifications)
+          `)
+          .not('email', 'is', null)
+          .eq('notification_preferences.email_notifications', true);
       } else if (user_id) {
+        // Para usuário específico: verificar se tem email e preferências ativadas
         usersQuery = supabase
           .from('profiles')
-          .select('user_id, email')
+          .select(`
+            user_id, 
+            email,
+            notification_preferences(email_notifications)
+          `)
           .eq('user_id', user_id)
           .not('email', 'is', null);
       }
@@ -77,7 +88,11 @@ serve(async (req) => {
       if (usersQuery) {
         const { data: users, error: usersError } = await usersQuery;
         if (!usersError && users) {
-          usersToEmail = users;
+          // Filtrar usuários que têm email_notifications ativado
+          usersToEmail = users.filter(user => {
+            const emailPref = user.notification_preferences?.[0]?.email_notifications;
+            return emailPref !== false; // Default true se não especificado
+          });
         }
       }
     }
