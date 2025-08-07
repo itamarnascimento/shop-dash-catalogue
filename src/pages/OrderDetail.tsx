@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Package, User, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import Header from '@/components/Header';
+import CartDrawer from '@/components/CartDrawer';
 
 interface OrderDetailData {
   id: string;
@@ -33,6 +35,7 @@ const OrderDetail = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState<OrderDetailData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -151,6 +154,9 @@ const OrderDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header
+        onCartClick={() => setIsCartOpen(true)}
+      />
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col space-y-8">
           {/* Header */}
@@ -307,6 +313,10 @@ const OrderDetail = () => {
           </div>
         </div>
       </div>
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </div>
   );
 };

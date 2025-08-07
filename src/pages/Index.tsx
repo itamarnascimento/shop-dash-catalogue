@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import CartDrawer from '@/components/CartDrawer';
+import CategoryFilter from '@/components/CategoryFilter';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
-import CategoryFilter from '@/components/CategoryFilter';
 import ProductGrid from '@/components/ProductGrid';
-import CartDrawer from '@/components/CartDrawer';
 import { products } from '@/data/products';
+import { useMemo, useState } from 'react';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,6 +26,7 @@ const Index = () => {
       <Header 
         onSearchChange={setSearchQuery}
         onCartClick={() => setIsCartOpen(true)}
+        visibleSearchBar={true}
       />
       
       <HeroSection />

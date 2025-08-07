@@ -10,11 +10,12 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { NotificationCenter } from '@/components/NotificationCenter';
 
 interface HeaderProps {
-  onSearchChange: (query: string) => void;
+  onSearchChange?: (query: string) => void;
   onCartClick: () => void;
+  visibleSearchBar?: boolean
 }
 
-const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
+const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick, visibleSearchBar = false }) => {
   const { getTotalItems } = useCart();
   const { user, signOut, profile } = useAuth();
   const { isAdmin } = useUserRole();
@@ -27,48 +28,49 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <img 
-              src="/lovable-uploads/137beee5-807f-4387-b7cb-717db9d00a6d.png" 
-              alt="Dias personalizados" 
+            <img
+              src="/lovable-uploads/137beee5-807f-4387-b7cb-717db9d00a6d.png"
+              alt="Dias personalizados"
               className="w-12 h-12 object-contain"
             />
             <h1 className="text-xl font-bold text-foreground hidden sm:block">Dias personalizados</h1>
           </Link>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-md mx-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Buscar produtos..."
-                className="pl-10 bg-background border-border"
-                onChange={(e) => onSearchChange(e.target.value)}
-              />
+          {
+            visibleSearchBar && <div className="flex-1 max-w-md mx-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Buscar produtos..."
+                  className="pl-10 bg-background border-border"
+                  onChange={(e) => onSearchChange(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-
+          }
           {/* Actions */}
           <div className="flex items-center space-x-2">
             {user ? (
               <>
                 {/* Notification Center */}
                 <NotificationCenter />
-                
+
                 {/* Navigation Links */}
                 <nav className="hidden md:flex items-center space-x-1 mr-4">
-                  <Button 
-                    variant={location.pathname === '/' ? 'secondary' : 'ghost'} 
-                    size="sm" 
+                  <Button
+                    variant={location.pathname === '/' ? 'secondary' : 'ghost'}
+                    size="sm"
                     asChild
                   >
                     <Link to="/">
                       Produtos
                     </Link>
                   </Button>
-                  <Button 
-                    variant={location.pathname === '/wishlist' ? 'secondary' : 'ghost'} 
-                    size="sm" 
+                  <Button
+                    variant={location.pathname === '/wishlist' ? 'secondary' : 'ghost'}
+                    size="sm"
                     asChild
                   >
                     <Link to="/wishlist">
@@ -76,9 +78,9 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
                       Lista de Desejos
                     </Link>
                   </Button>
-                  <Button 
-                    variant={location.pathname === '/orders' ? 'secondary' : 'ghost'} 
-                    size="sm" 
+                  <Button
+                    variant={location.pathname === '/orders' ? 'secondary' : 'ghost'}
+                    size="sm"
                     asChild
                   >
                     <Link to="/orders">
@@ -130,30 +132,30 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
                             Gerenciar Categorias
                           </Link>
                         </DropdownMenuItem>
-                         <DropdownMenuItem asChild>
-                           <Link to="/admin/users">
-                             <Settings className="w-4 h-4 mr-2" />
-                             Gerenciar Usuários
-                           </Link>
-                         </DropdownMenuItem>
-                         <DropdownMenuItem asChild>
-                           <Link to="/admin/orders">
-                             <Settings className="w-4 h-4 mr-2" />
-                             Gerenciar Pedidos
-                           </Link>
-                         </DropdownMenuItem>
-                         <DropdownMenuItem asChild>
-                           <Link to="/admin/carousel">
-                             <Images className="w-4 h-4 mr-2" />
-                             Gerenciar Carrossel
-                           </Link>
-                         </DropdownMenuItem>
-                         <DropdownMenuItem asChild>
-                           <Link to="/admin/coupons">
-                             <Tag className="w-4 h-4 mr-2" />
-                             Gerenciar Cupons
-                           </Link>
-                         </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/users">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Gerenciar Usuários
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/orders">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Gerenciar Pedidos
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/carousel">
+                            <Images className="w-4 h-4 mr-2" />
+                            Gerenciar Carrossel
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/coupons">
+                            <Tag className="w-4 h-4 mr-2" />
+                            Gerenciar Cupons
+                          </Link>
+                        </DropdownMenuItem>
                       </>
                     )}
                     <DropdownMenuSeparator />
@@ -165,9 +167,9 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
                 </DropdownMenu>
 
                 {/* Mobile logout button */}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={signOut}
                   title="Sair"
                   className="sm:hidden"
@@ -183,10 +185,10 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick }) => {
                 </Link>
               </Button>
             )}
-            
-            <Button 
-              variant="ghost" 
-              size="icon" 
+
+            <Button
+              variant="ghost"
+              size="icon"
               className="relative"
               onClick={onCartClick}
             >

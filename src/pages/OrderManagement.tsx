@@ -9,6 +9,8 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import Header from '@/components/Header';
+import CartDrawer from '@/components/CartDrawer';
 
 interface OrderWithProfile {
   id: string;
@@ -32,6 +34,7 @@ const OrderManagement = () => {
     pendingOrders: 0,
     uniqueCustomers: 0
   });
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -108,6 +111,33 @@ const OrderManagement = () => {
     }
   };
 
+  const notificationUpdateStatus = async (orderId: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-push-notification', {
+        body: {
+          user_id: user?.id,
+          title: `Atualização Do Pedido: #${orderId.slice(0, 8)}`,
+          body: 'Status do Pedido Alterado',
+          type: 'order_update',
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Teste Enviado',
+        description: 'Uma notificação de teste foi enviada!',
+      });
+    } catch (error) {
+      console.error('Erro ao enviar notificação de teste:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível enviar a notificação de teste.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       const { error } = await supabase
@@ -124,6 +154,7 @@ const OrderManagement = () => {
 
       loadOrders();
       loadStats();
+      notificationUpdateStatus(orderId)
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
       toast({
@@ -176,6 +207,9 @@ const OrderManagement = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header
+        onCartClick={() => setIsCartOpen(true)}
+      />
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col space-y-8">
           {/* Header */}
@@ -324,6 +358,10 @@ const OrderManagement = () => {
           </Card>
         </div>
       </div>
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </div>
   );
 };
