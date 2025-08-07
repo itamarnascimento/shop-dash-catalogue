@@ -1,4 +1,5 @@
 import { useAuth } from '@/context/AuthContext';
+import { loadProducts } from '@/data/products';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Coupon, ProductDB } from '@/types/database';
@@ -74,8 +75,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Converter dados do banco para formato do carrinho local
       const cartItems = await Promise.all((data || []).map(async (dbItem) => {
         // Buscar dados do produto nos produtos estáticos (por enquanto)
-        const products = await import('@/data/products');
-        const product = products.products.find(p => p.id === dbItem.product_id);
+        const products = await loadProducts();
+        const product = products.find(p => p.id === dbItem.product_id);
         
         if (product) {
           return {
