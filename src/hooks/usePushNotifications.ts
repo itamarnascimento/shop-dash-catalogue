@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
 interface PushSubscriptionData {
   endpoint: string;
   p256dh: string;
@@ -13,6 +12,7 @@ export const usePushNotifications = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
 
   useEffect(() => {
     // Verificar se push notifications são suportadas
@@ -74,7 +74,7 @@ export const usePushNotifications = () => {
     try {
       // Solicitar permissão
       const permission = await Notification.requestPermission();
-      
+
       if (permission !== 'granted') {
         toast({
           title: 'Permissão Negada',
@@ -89,7 +89,7 @@ export const usePushNotifications = () => {
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlB64ToUint8Array(
-          'BKWZrj4xyffEHfCr6_pC1vJT4xPKT5nXPB3-QqW_2--9T-1X-4eF-4eF-4eF-4eF-4eF-4eF-4eF-4eF-4eF-4eF'
+          'BCzuTSKR0ztA9IQveqYCwTeev4Wnlkv09dupJC0fvq00kxfV-D4UGkqACPg6YyFJU7VjWewQ-4caM6sZWno80Zw'
         )
       });
 

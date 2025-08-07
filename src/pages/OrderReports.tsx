@@ -8,6 +8,8 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import Header from '@/components/Header';
+import CartDrawer from '@/components/CartDrawer';
 
 const OrderReports = () => {
   const [loading, setLoading] = useState(true);
@@ -21,6 +23,7 @@ const OrderReports = () => {
     averageOrder: 0,
     completionRate: 0
   });
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const { toast } = useToast();
 
   const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1'];
@@ -64,7 +67,7 @@ const OrderReports = () => {
 
   const processSalesData = (orders: any[], days: number) => {
     const salesByDay = new Map();
-    
+
     // Inicializar todos os dias com 0
     for (let i = 0; i < days; i++) {
       const date = new Date();
@@ -95,7 +98,7 @@ const OrderReports = () => {
 
   const processStatusData = (orders: any[]) => {
     const statusCount = new Map();
-    
+
     orders.forEach(order => {
       const status = order.status;
       statusCount.set(status, (statusCount.get(status) || 0) + 1);
@@ -120,16 +123,16 @@ const OrderReports = () => {
 
   const processRevenueData = (orders: any[], days: number) => {
     const revenueByMonth = new Map();
-    
+
     orders.forEach(order => {
       const date = new Date(order.created_at);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const monthName = date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
-      
+
       if (!revenueByMonth.has(monthKey)) {
         revenueByMonth.set(monthKey, { month: monthName, revenue: 0 });
       }
-      
+
       revenueByMonth.get(monthKey).revenue += Number(order.total_amount);
     });
 
@@ -186,6 +189,9 @@ const OrderReports = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header
+        onCartClick={() => setIsCartOpen(true)}
+      />
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col space-y-8">
           {/* Header */}
@@ -274,10 +280,10 @@ const OrderReports = () => {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="orders" 
-                        stroke="hsl(var(--primary))" 
+                      <Line
+                        type="monotone"
+                        dataKey="orders"
+                        stroke="hsl(var(--primary))"
                         strokeWidth={2}
                         name="Pedidos"
                       />
@@ -301,8 +307,8 @@ const OrderReports = () => {
                       <XAxis dataKey="date" />
                       <YAxis />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar 
-                        dataKey="revenue" 
+                      <Bar
+                        dataKey="revenue"
                         fill="hsl(var(--secondary))"
                         name="Receita"
                       />
@@ -357,10 +363,10 @@ const OrderReports = () => {
                       <XAxis dataKey="month" />
                       <YAxis />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="revenue" 
-                        stroke="hsl(var(--accent))" 
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="hsl(var(--accent))"
                         strokeWidth={3}
                         name="Receita"
                       />
@@ -372,6 +378,10 @@ const OrderReports = () => {
           </div>
         </div>
       </div>
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </div>
   );
 };

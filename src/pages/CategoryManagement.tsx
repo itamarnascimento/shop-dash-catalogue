@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { Search, Plus, Edit, Trash2, Tag } from 'lucide-react';
+import CartDrawer from '@/components/CartDrawer';
+import Header from '@/components/Header';
 
 interface Category {
   id: string;
@@ -29,6 +31,8 @@ const CategoryManagement = () => {
     name: '',
     description: ''
   });
+
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -187,6 +191,10 @@ const CategoryManagement = () => {
   }
 
   return (
+    <div className="min-h-screen bg-background">
+      <Header
+        onCartClick={() => setIsCartOpen(true)}
+      />
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -334,6 +342,11 @@ const CategoryManagement = () => {
           )}
         </CardContent>
       </Card>
+    </div>
+       <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </div>
   );
 };

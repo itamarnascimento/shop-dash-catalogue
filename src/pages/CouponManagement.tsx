@@ -14,6 +14,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Coupon } from '@/types/database';
+import Header from '@/components/Header';
+import CartDrawer from '@/components/CartDrawer';
 
 const CouponManagement: React.FC = () => {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -32,6 +34,8 @@ const CouponManagement: React.FC = () => {
     is_active: true,
     expires_at: ''
   });
+
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     loadCoupons();
@@ -202,15 +206,19 @@ const CouponManagement: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
+
+    <div className="min-h-screen bg-background">
+      <Header
+        onCartClick={() => setIsCartOpen(true)}
+      />
+      <div className="max-w-7xl mx-auto mt-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Gerenciar Cupons</h1>
             <p className="text-muted-foreground">Crie e gerencie cupons de desconto</p>
           </div>
-          
+
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={resetForm}>
@@ -224,7 +232,7 @@ const CouponManagement: React.FC = () => {
                   {editingCoupon ? 'Editar Cupom' : 'Novo Cupom'}
                 </DialogTitle>
               </DialogHeader>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="code">Código do Cupom *</Label>
@@ -236,7 +244,7 @@ const CouponManagement: React.FC = () => {
                     className="uppercase"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="discount_type">Tipo de Desconto *</Label>
                   <Select value={formData.discount_type} onValueChange={(value: 'percentage' | 'fixed') => setFormData({ ...formData, discount_type: value })}>
@@ -249,7 +257,7 @@ const CouponManagement: React.FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="discount_value">Valor do Desconto *</Label>
                   <Input
@@ -262,7 +270,7 @@ const CouponManagement: React.FC = () => {
                     placeholder={formData.discount_type === 'percentage' ? 'Ex: 10' : 'Ex: 25.00'}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="minimum_order_value">Valor Mínimo do Pedido</Label>
                   <Input
@@ -274,7 +282,7 @@ const CouponManagement: React.FC = () => {
                     placeholder="0.00"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="max_uses">Limite de Uso</Label>
                   <Input
@@ -286,7 +294,7 @@ const CouponManagement: React.FC = () => {
                     placeholder="Ilimitado"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="expires_at">Data de Expiração</Label>
                   <Input
@@ -296,7 +304,7 @@ const CouponManagement: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
                   />
                 </div>
-                
+
                 <div className="col-span-2 space-y-2">
                   <Label htmlFor="description">Descrição</Label>
                   <Textarea
@@ -307,7 +315,7 @@ const CouponManagement: React.FC = () => {
                     rows={3}
                   />
                 </div>
-                
+
                 <div className="col-span-2 flex items-center space-x-2">
                   <Switch
                     id="is_active"
@@ -317,7 +325,7 @@ const CouponManagement: React.FC = () => {
                   <Label htmlFor="is_active">Cupom ativo</Label>
                 </div>
               </div>
-              
+
               <div className="flex justify-end gap-2 mt-6">
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancelar
@@ -397,18 +405,18 @@ const CouponManagement: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge 
+                        <Badge
                           variant={
                             !coupon.is_active ? "secondary" :
-                            isExpired(coupon.expires_at) ? "destructive" :
-                            (coupon.max_uses && coupon.current_uses >= coupon.max_uses) ? "destructive" :
-                            "default"
+                              isExpired(coupon.expires_at) ? "destructive" :
+                                (coupon.max_uses && coupon.current_uses >= coupon.max_uses) ? "destructive" :
+                                  "default"
                           }
                         >
                           {!coupon.is_active ? "Inativo" :
-                           isExpired(coupon.expires_at) ? "Expirado" :
-                           (coupon.max_uses && coupon.current_uses >= coupon.max_uses) ? "Esgotado" :
-                           "Ativo"}
+                            isExpired(coupon.expires_at) ? "Expirado" :
+                              (coupon.max_uses && coupon.current_uses >= coupon.max_uses) ? "Esgotado" :
+                                "Ativo"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -430,7 +438,7 @@ const CouponManagement: React.FC = () => {
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          
+
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="ghost" size="sm">
@@ -441,7 +449,7 @@ const CouponManagement: React.FC = () => {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Tem certeza que deseja excluir o cupom "{coupon.code}"? 
+                                  Tem certeza que deseja excluir o cupom "{coupon.code}"?
                                   Esta ação não pode ser desfeita.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
@@ -466,6 +474,10 @@ const CouponManagement: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </div>
   );
 };
