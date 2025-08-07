@@ -1,11 +1,11 @@
-import React from 'react';
-import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWishlist } from '@/context/WishlistContext';
-import { Product } from '@/types/product';
+import { ProductDB } from '@/types/database';
+import { Heart } from 'lucide-react';
+import React from 'react';
 
 interface WishlistButtonProps {
-  product: Product;
+  product: ProductDB;
   className?: string;
 }
 

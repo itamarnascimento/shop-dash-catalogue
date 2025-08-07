@@ -1,14 +1,13 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { WishlistItem } from '@/types/database';
-import { Product } from '@/types/product';
+import { supabase } from '@/integrations/supabase/client';
+import { ProductDB, WishlistItem } from '@/types/database';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 interface WishlistContextType {
   wishlistItems: WishlistItem[];
   isInWishlist: (productId: string) => boolean;
-  addToWishlist: (product: Product) => Promise<void>;
+  addToWishlist: (product: ProductDB) => Promise<void>;
   removeFromWishlist: (productId: string) => Promise<void>;
   loading: boolean;
 }
@@ -52,7 +51,7 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({ children }
     return wishlistItems.some(item => item.product_id === productId);
   };
 
-  const addToWishlist = async (product: Product) => {
+  const addToWishlist = async (product: ProductDB) => {
     if (!user) {
       toast({
         title: "Login necessário",

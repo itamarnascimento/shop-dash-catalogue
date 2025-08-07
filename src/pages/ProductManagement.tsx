@@ -12,9 +12,10 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ProductDB } from '@/types/database';
+import { Categories, ProductDB } from '@/types/database';
 import CartDrawer from '@/components/CartDrawer';
 import Header from '@/components/Header';
+import { loadProducts } from '@/data/products';
 
 const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<ProductDB[]>([]);
@@ -27,37 +28,50 @@ const ProductManagement: React.FC = () => {
     description: '',
     price: '',
     image_url: '',
-    category: '',
+    category_id: '',
     in_stock: true,
   });
+
+
+  const [categories, setCategories] = useState<Categories[]>([])
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const categories = [
-    'Canecas',
-    'Almofadas',
-    'Camisetas',
-    'Mousepad',
-    'Quadros',
-    'Chaveiros',
-    'Adesivos',
-    'Outros'
-  ];
+  const getcategories = async () => {
 
-  useEffect(() => {
-    if (user) {
-      loadProducts();
-    }
-  }, [user]);
-
-  const loadProducts = async () => {
     try {
       const { data, error } = await supabase
-        .from('products')
-        .select('*')
+        .from('categories')
+        .select('id, name, created_at, updated_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      setCategories(data || [])
+
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar as categorias.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+
+
+  }
+
+  useEffect(() => {
+    if (user) {
+      findProducts();
+      getcategories()
+    }
+  }, [user]);
+
+  const findProducts = async () => {
+    try {
+      const data = await loadProducts()
       setProducts(data || []);
     } catch (error) {
       console.error('Erro ao carregar produtos:', error);
@@ -72,7 +86,7 @@ const ProductManagement: React.FC = () => {
       description: '',
       price: '',
       image_url: '',
-      category: '',
+      category_id: '',
       in_stock: true,
     });
     setEditingProduct(null);
@@ -85,7 +99,7 @@ const ProductManagement: React.FC = () => {
       description: product.description,
       price: product.price.toString(),
       image_url: product.image_url,
-      category: product.category,
+      category_id: product.category_id,
       in_stock: product.in_stock,
     });
     setIsDialogOpen(true);
@@ -94,7 +108,7 @@ const ProductManagement: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.description || !formData.price || !formData.category) {
+    if (!formData.name || !formData.description || !formData.price || !formData.category_id) {
       toast({
         title: "Campos obrigatórios",
         description: "Preencha todos os campos obrigatórios",
@@ -110,7 +124,7 @@ const ProductManagement: React.FC = () => {
         description: formData.description,
         price: parseFloat(formData.price),
         image_url: formData.image_url || 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=400&fit=crop',
-        category: formData.category,
+        category_id: formData.category_id,
         in_stock: formData.in_stock,
       };
 
@@ -143,7 +157,7 @@ const ProductManagement: React.FC = () => {
 
       setIsDialogOpen(false);
       resetForm();
-      loadProducts();
+      findProducts();
     } catch (error) {
       console.error('Erro ao salvar produto:', error);
       toast({
@@ -172,7 +186,7 @@ const ProductManagement: React.FC = () => {
         description: "Produto foi removido com sucesso",
       });
 
-      loadProducts();
+      findProducts();
     } catch (error) {
       console.error('Erro ao excluir produto:', error);
       toast({
@@ -248,13 +262,13 @@ const ProductManagement: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="category">Categoria *</Label>
-                    <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                    <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map(category => (
-                          <SelectItem key={category} value={category}>{category}</SelectItem>
+                        {(categories ?? []).map(category => (
+                          <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

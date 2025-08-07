@@ -1,101 +1,11 @@
-import { Product } from '@/types/product';
+import { supabase } from '@/integrations/supabase/client';
 
-export const products: Product[] = [
-  {
-    id: '1',
-    name: 'MacBook Pro M3',
-    description: 'Notebook profissional com chip M3, 16GB RAM e 512GB SSD',
-    price: 12999.99,
-    image: '/placeholder.svg',
-    category: 'Notebooks',
-    rating: 4.8,
-    reviews: 245,
-    inStock: true,
-  },
-  {
-    id: '2',
-    name: 'iPhone 15 Pro',
-    description: 'Smartphone premium com câmera de 48MP e chip A17 Pro',
-    price: 8999.99,
-    image: '/placeholder.svg',
-    category: 'Smartphones',
-    rating: 4.7,
-    reviews: 189,
-    inStock: true,
-  },
-  {
-    id: '3',
-    name: 'Samsung Galaxy S24',
-    description: 'Smartphone Android com IA integrada e câmera de 200MP',
-    price: 7499.99,
-    image: '/placeholder.svg',
-    category: 'Smartphones',
-    rating: 4.6,
-    reviews: 156,
-    inStock: true,
-  },
-  {
-    id: '4',
-    name: 'AirPods Pro 2',
-    description: 'Fones com cancelamento de ruído e áudio espacial',
-    price: 1899.99,
-    image: '/placeholder.svg',
-    category: 'Áudio',
-    rating: 4.9,
-    reviews: 567,
-    inStock: true,
-  },
-  {
-    id: '5',
-    name: 'PlayStation 5',
-    description: 'Console de última geração com SSD ultrarrápido',
-    price: 4499.99,
-    image: '/placeholder.svg',
-    category: 'Games',
-    rating: 4.8,
-    reviews: 334,
-    inStock: false,
-  },
-  {
-    id: '6',
-    name: 'Dell XPS 13',
-    description: 'Ultrabook premium com tela InfinityEdge e Intel i7',
-    price: 9999.99,
-    image: '/placeholder.svg',
-    category: 'Notebooks',
-    rating: 4.5,
-    reviews: 123,
-    inStock: true,
-  },
-  {
-    id: '7',
-    name: 'Sony WH-1000XM5',
-    description: 'Headphone over-ear com cancelamento de ruído premium',
-    price: 1999.99,
-    image: '/placeholder.svg',
-    category: 'Áudio',
-    rating: 4.7,
-    reviews: 289,
-    inStock: true,
-  },
-  {
-    id: '8',
-    name: 'iPad Pro 12.9',
-    description: 'Tablet profissional com chip M2 e tela Liquid Retina XDR',
-    price: 8999.99,
-    image: '/placeholder.svg',
-    category: 'Tablets',
-    rating: 4.8,
-    reviews: 198,
-    inStock: true,
-  },
-];
+export const loadProducts = async () => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-export const categories = [
-  'Todos',
-  'Smartphones',
-  'Notebooks',
-  'Tablets',
-  'Áudio',
-  'Games',
-];
+  if (error) throw error;
+  return data || [];
+};

@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState } from 'react';
-import { CartItem, Product, CartContextType } from '@/types/product';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Coupon } from '@/types/database';
+import { supabase } from '@/integrations/supabase/client';
+import { Coupon, ProductDB } from '@/types/database';
+import { CartContextType, CartItem } from '@/types/product';
+import React, { createContext, ReactNode, useContext, useEffect, useReducer, useState } from 'react';
 
 type CartAction =
-  | { type: 'ADD_TO_CART'; product: Product }
+  | { type: 'ADD_TO_CART'; product: ProductDB }
   | { type: 'REMOVE_FROM_CART'; productId: string }
   | { type: 'UPDATE_QUANTITY'; productId: string; quantity: number }
   | { type: 'CLEAR_CART' }
@@ -143,7 +143,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadCartFromDB();
   }, [user]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: ProductDB) => {
     dispatch({ type: 'ADD_TO_CART', product });
     
     if (user) {

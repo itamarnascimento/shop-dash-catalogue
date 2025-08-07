@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { Star, ShoppingCart, MessageCircle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { ProductReviews } from '@/components/ProductReviews';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { WishlistButton } from '@/components/WishlistButton';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
-import { WishlistButton } from '@/components/WishlistButton';
-import { ProductReviews } from '@/components/ProductReviews';
-import { Product } from '@/types/product';
+import { ProductDB } from '@/types/database';
+import { MessageCircle, ShoppingCart, Star } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductDB;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
@@ -39,7 +39,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <CardContent className="p-0">
         <div className="relative overflow-hidden">
           <img
-            src={product.image}
+            src={product.image_url}
             alt={product.name}
             className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
           />
@@ -52,7 +52,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {product.category}
             </Badge>
           </div>
-          {!product.inStock && (
+          {!product.in_stock && (
             <div className="absolute inset-0 bg-muted/80 backdrop-blur-sm flex items-center justify-center">
               <Badge variant="destructive" className="text-sm px-4 py-2">
                 Fora de Estoque
@@ -78,7 +78,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   <Star
                     key={i}
                     className={`w-4 h-4 transition-colors ${
-                      i < Math.floor(product.rating)
+                      i < 5//Math.floor(product.rating)
                         ? 'text-warm-coral fill-current'
                         : 'text-muted-foreground'
                     }`}
@@ -86,7 +86,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 ))}
               </div>
               <span className="text-sm text-muted-foreground">
-                {product.rating} ({product.reviews})
+                {/* {product.rating} ({product.reviews}) */}
+                5 5
               </span>
             </div>
 
@@ -120,11 +121,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             
             <Button 
               onClick={handleAddToCart} 
-              disabled={!product.inStock}
+              disabled={!product.in_stock}
               className="w-full btn-gradient hover:shadow-warm transition-all duration-300 transform hover:scale-[1.02]"
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
-              {product.inStock ? 'Adicionar ao Carrinho' : 'Indisponível'}
+              {product.in_stock ? 'Adicionar ao Carrinho' : 'Indisponível'}
             </Button>
           </div>
         </div>
