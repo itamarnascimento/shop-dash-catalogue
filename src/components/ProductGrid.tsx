@@ -1,9 +1,9 @@
+import { ProductDB } from '@/types/database';
 import React from 'react';
-import { Product } from '@/types/product';
 import ProductCard from './ProductCard';
 
 interface ProductGridProps {
-  products: Product[];
+  products: ProductDB[];
   loading?: boolean;
 }
 
