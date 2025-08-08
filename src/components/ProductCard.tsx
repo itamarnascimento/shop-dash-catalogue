@@ -44,13 +44,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
           />
           <div className="absolute top-3 right-3 flex gap-2">
-            <WishlistButton product={product} />
-            <Badge 
+           {product.categories?.name && <Badge 
               variant="secondary" 
               className="bg-secondary/90 backdrop-blur-sm text-secondary-foreground font-medium"
             >
-              {product.category}
-            </Badge>
+              {product.categories?.name}
+            </Badge>}
+            <WishlistButton product={product} />
           </div>
           {!product.in_stock && (
             <div className="absolute inset-0 bg-muted/80 backdrop-blur-sm flex items-center justify-center">

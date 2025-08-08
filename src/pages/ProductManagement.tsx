@@ -16,6 +16,8 @@ import { Categories, ProductDB } from '@/types/database';
 import CartDrawer from '@/components/CartDrawer';
 import Header from '@/components/Header';
 import { loadProducts } from '@/data/products';
+import { loadCategories } from '@/data/categories';
+import { AlertConfirm } from '@/components/Alert/Alert';
 
 const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<ProductDB[]>([]);
@@ -23,6 +25,9 @@ const ProductManagement: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductDB | null>(null);
+  const [idForDeleteProduct, setIdForDeleteProduct] = useState("")
+  const [showAlert, setShowAlert] = useState(false)
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -40,13 +45,7 @@ const ProductManagement: React.FC = () => {
   const getcategories = async () => {
 
     try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('id, name, created_at, updated_at')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
+      const data = await loadCategories()
       setCategories(data || [])
 
     } catch (error) {
@@ -58,8 +57,6 @@ const ProductManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-
-
   }
 
   useEffect(() => {
@@ -170,9 +167,7 @@ const ProductManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (productId: string) => {
-    if (!confirm('Tem certeza que deseja excluir este produto?')) return;
-
+  const handleDelete = async (productId: string) => {   
     try {
       const { error } = await supabase
         .from('products')
@@ -220,6 +215,11 @@ const ProductManagement: React.FC = () => {
       <Header
         onCartClick={() => setIsCartOpen(true)}
       />
+      {showAlert && <AlertConfirm
+        description='Você deseja realmente excluir o produto? '
+        yes={() => handleDelete(idForDeleteProduct)}
+        setShowAlert={setShowAlert}
+      />}
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -372,7 +372,7 @@ const ProductManagement: React.FC = () => {
                       </Badge>
                     </div>
                     <div className="absolute top-2 left-2">
-                      <Badge variant="secondary">{product.category}</Badge>
+                      <Badge variant="secondary">{product.categories.name}</Badge>
                     </div>
                   </div>
 
@@ -399,7 +399,10 @@ const ProductManagement: React.FC = () => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleDelete(product.id)}
+                        onClick={() => {
+                          setShowAlert(true)
+                          setIdForDeleteProduct(product.id)
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

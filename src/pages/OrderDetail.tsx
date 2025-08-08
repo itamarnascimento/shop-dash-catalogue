@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Package, User, MapPin, Calendar, DollarSign } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import Header from '@/components/Header';
 import CartDrawer from '@/components/CartDrawer';
+import Header from '@/components/Header';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { useUserRole } from '@/hooks/useUserRole';
+import { supabase } from '@/integrations/supabase/client';
+import { ArrowLeft, Calendar, DollarSign, MapPin, Package, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 
 interface OrderDetailData {
   id: string;
@@ -37,7 +38,7 @@ const OrderDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { toast } = useToast();
-
+  const { isAdmin } = useUserRole();
   useEffect(() => {
     if (orderId) {
       loadOrderDetail();
@@ -161,11 +162,11 @@ const OrderDetail = () => {
         <div className="flex flex-col space-y-8">
           {/* Header */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" asChild>
+            {isAdmin && <Button variant="ghost" size="icon" asChild>
               <Link to="/admin/orders">
                 <ArrowLeft className="w-4 h-4" />
               </Link>
-            </Button>
+            </Button>}
             <div>
               <h1 className="text-3xl font-bold text-foreground">
                 Pedido #{order.id.slice(0, 8)}

@@ -1,13 +1,13 @@
-import React from 'react';
-import { ShoppingCart, Search, User, LogOut, Heart, Package, Settings, MapPin, Images, Tag, Bell } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
-import { useUserRole } from '@/hooks/useUserRole';
 import { NotificationCenter } from '@/components/NotificationCenter';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
+import { useUserRole } from '@/hooks/useUserRole';
+import { Heart, Images, LogOut, MapPin, Package, Search, Settings, ShoppingCart, Tag, User } from 'lucide-react';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 interface HeaderProps {
   onSearchChange?: (query: string) => void;
@@ -21,7 +21,9 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick, visibleSea
   const { isAdmin } = useUserRole();
   const location = useLocation();
   const totalItems = getTotalItems();
-
+  const widthPage = window.innerWidth
+  
+  
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4 py-4">
@@ -73,29 +75,15 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick, visibleSea
                     size="sm"
                     asChild
                   >
-                    <Link to="/wishlist">
-                      <Heart className="w-4 h-4 mr-1" />
-                      Lista de Desejos
-                    </Link>
-                  </Button>
-                  <Button
-                    variant={location.pathname === '/orders' ? 'secondary' : 'ghost'}
-                    size="sm"
-                    asChild
-                  >
-                    <Link to="/orders">
-                      <Package className="w-4 h-4 mr-1" />
-                      Pedidos
-                    </Link>
-                  </Button>
+                  </Button>                 
                 </nav>
 
                 {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="hidden sm:flex">
+                    <Button variant="ghost" size="sm" className={(widthPage < 400 ? "sm:hidden" : "hidden sm:flex")}>
                       <User className="w-4 h-4 mr-2" />
-                      {profile?.nome_completo || user.email}
+                     {widthPage > 400 && (profile?.nome_completo || user.email)}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
@@ -164,18 +152,7 @@ const Header: React.FC<HeaderProps> = ({ onSearchChange, onCartClick, visibleSea
                       Sair
                     </DropdownMenuItem>
                   </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Mobile logout button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={signOut}
-                  title="Sair"
-                  className="sm:hidden"
-                >
-                  <LogOut className="w-5 h-5" />
-                </Button>
+                </DropdownMenu>             
               </>
             ) : (
               <Button variant="ghost" size="sm" asChild>
