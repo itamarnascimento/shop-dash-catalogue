@@ -12,11 +12,12 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [products, setProducts] = useState<ProductDB[]>([]);
+  const [productsFilter, setProductsFilter] = useState<ProductDB[]>([]);
   useMemo(() => {
-    setProducts(products.filter((product) => {
+    setProductsFilter(products.filter((product) => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'Todos' || product.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'Todos' || product.categories.name === selectedCategory;
 
       return matchesSearch && matchesCategory;
     }));
@@ -25,6 +26,7 @@ const Index = () => {
   const getProducts = async () => {
     const data = await loadProducts()
     setProducts(data || [])
+    setProductsFilter(data || [])
   }
   useEffect(() => {
     getProducts()
@@ -56,7 +58,7 @@ const Index = () => {
 
         {/* Products Grid */}
         <section>
-          <ProductGrid products={products} />
+          <ProductGrid products={productsFilter} />
         </section>
       </main>
 
