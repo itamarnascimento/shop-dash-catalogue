@@ -32,61 +32,58 @@ const App = () => (
       <AuthProvider>
         <WishlistProvider>
           <CartProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/orders" element={<OrderHistory />} />
-          <Route path="/addresses" element={<DeliveryAddresses />} />
-          <Route path="/notifications" element={<NotificationPreferences />} />
-          <Route path="/admin/products" element={
-            <ProtectedAdminRoute>
-              <ProductManagement />
-            </ProtectedAdminRoute>
-          } />
-          <Route path="/admin/users" element={
-            <ProtectedAdminRoute>
-              <UserManagement />
-            </ProtectedAdminRoute>
-          } />
-          <Route path="/admin/categories" element={
-            <ProtectedAdminRoute>
-              <CategoryManagement />
-            </ProtectedAdminRoute>
-          } />
-          <Route path="/admin/orders" element={
-            <ProtectedAdminRoute>
-              <OrderManagement />
-            </ProtectedAdminRoute>
-          } />
-          <Route path="/admin/order-reports" element={
-            <ProtectedAdminRoute>
-              <OrderReports />
-            </ProtectedAdminRoute>
-          } />
-          <Route path="/admin/orders/:orderId" element={
-            <ProtectedAdminRoute>
-              <OrderDetail />
-            </ProtectedAdminRoute>
-          } />
-          <Route path="/admin/carousel" element={
-            <ProtectedAdminRoute>
-              <CarouselManagement />
-            </ProtectedAdminRoute>
-          } />
-          <Route path="/admin/coupons" element={
-            <ProtectedAdminRoute>
-              <CouponManagement />
-            </ProtectedAdminRoute>
-          } />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/orders" element={<OrderHistory />} />
+                <Route path="/order/:orderId" element={<OrderDetail />
+                } />
+                <Route path="/addresses" element={<DeliveryAddresses />} />
+                <Route path="/notifications" element={<NotificationPreferences />} />
+                <Route path="/admin/products" element={
+                  <ProtectedAdminRoute>
+                    <ProductManagement />
+                  </ProtectedAdminRoute>
+                } />
+                <Route path="/admin/users" element={
+                  <ProtectedAdminRoute>
+                    <UserManagement />
+                  </ProtectedAdminRoute>
+                } />
+                <Route path="/admin/categories" element={
+                  <ProtectedAdminRoute>
+                    <CategoryManagement />
+                  </ProtectedAdminRoute>
+                } />
+                <Route path="/admin/orders" element={
+                  <ProtectedAdminRoute>
+                    <OrderManagement />
+                  </ProtectedAdminRoute>
+                } />
+                <Route path="/admin/order-reports" element={
+                  <ProtectedAdminRoute>
+                    <OrderReports />
+                  </ProtectedAdminRoute>
+                } />
+                <Route path="/admin/carousel" element={
+                  <ProtectedAdminRoute>
+                    <CarouselManagement />
+                  </ProtectedAdminRoute>
+                } />
+                <Route path="/admin/coupons" element={
+                  <ProtectedAdminRoute>
+                    <CouponManagement />
+                  </ProtectedAdminRoute>
+                } />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
           </CartProvider>
         </WishlistProvider>
       </AuthProvider>

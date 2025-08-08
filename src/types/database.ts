@@ -64,7 +64,7 @@ export interface ProductDB {
   description: string;
   price: number;
   image_url: string;
-  category?: string;
+  categories?: { name: string };
   category_id?: string;
   in_stock: boolean;
   created_at: string;

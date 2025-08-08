@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
-import { Search, Plus, Edit, Trash2, Tag } from 'lucide-react';
+import { AlertConfirm } from '@/components/Alert/Alert';
 import CartDrawer from '@/components/CartDrawer';
 import Header from '@/components/Header';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Edit, Plus, Search, Tag, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface Category {
   id: string;
@@ -27,6 +28,8 @@ const CategoryManagement = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [idForDeleteCategory, setIdForDeleteCategory] = useState("")
+  const [showAlert, setShowAlert] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     description: ''
@@ -66,7 +69,7 @@ const CategoryManagement = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       toast({
         title: "Erro",
@@ -118,7 +121,7 @@ const CategoryManagement = () => {
       console.error('Error saving category:', error);
       toast({
         title: "Erro",
-        description: error.message.includes('duplicate') 
+        description: error.message.includes('duplicate')
           ? "Já existe uma categoria com este nome."
           : "Não foi possível salvar a categoria.",
         variant: "destructive",
@@ -136,11 +139,8 @@ const CategoryManagement = () => {
   };
 
   const handleDelete = async (categoryId: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta categoria?')) {
-      return;
-    }
-
     try {
+      setShowAlert(false)
       const { error } = await supabase
         .from('categories')
         .delete()
@@ -158,7 +158,7 @@ const CategoryManagement = () => {
       console.error('Error deleting category:', error);
       toast({
         title: "Erro",
-        description: error.message.includes('foreign key') 
+        description: error.message.includes('foreign key')
           ? "Não é possível excluir esta categoria pois existem produtos vinculados a ela."
           : "Não foi possível excluir a categoria.",
         variant: "destructive",
@@ -195,155 +195,163 @@ const CategoryManagement = () => {
       <Header
         onCartClick={() => setIsCartOpen(true)}
       />
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Tag className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Gestão de Categorias</h1>
-            <p className="text-muted-foreground">Organize os produtos em categorias</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and Add */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Buscar categorias..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Categoria
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <form onSubmit={handleSubmit}>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingCategory ? 'Editar Categoria' : 'Nova Categoria'}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingCategory 
-                    ? 'Atualize as informações da categoria.' 
-                    : 'Crie uma nova categoria para organizar seus produtos.'
-                  }
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Nome *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="Nome da categoria"
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Descrição</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    placeholder="Descrição da categoria (opcional)"
-                    rows={3}
-                  />
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={handleDialogClose}>
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  {editingCategory ? 'Atualizar' : 'Criar'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Categories Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Categorias ({filteredCategories.length})</CardTitle>
-          <CardDescription>
-            Gerencie as categorias dos produtos
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {filteredCategories.length === 0 ? (
-            <div className="text-center py-8">
-              <Tag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">
-                {searchQuery ? 'Nenhuma categoria encontrada.' : 'Nenhuma categoria criada ainda.'}
-              </p>
+      {showAlert && <AlertConfirm
+        description='Você deseja realmente excluir a categoria?'
+        yes={() => handleDelete(idForDeleteCategory)}
+        setShowAlert={setShowAlert}
+      />}
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Tag className="w-6 h-6 text-primary" />
             </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Criado em</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCategories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell className="font-medium">
-                      {category.name}
-                    </TableCell>
-                    <TableCell>
-                      {category.description || 'Sem descrição'}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(category.created_at).toLocaleDateString('pt-BR')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(category)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(category.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Gestão de Categorias</h1>
+              <p className="text-muted-foreground">Organize os produtos em categorias</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Add */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Buscar categorias..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Categoria
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <form onSubmit={handleSubmit}>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingCategory ? 'Editar Categoria' : 'Nova Categoria'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingCategory
+                      ? 'Atualize as informações da categoria.'
+                      : 'Crie uma nova categoria para organizar seus produtos.'
+                    }
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Nome *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Nome da categoria"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Descrição</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Descrição da categoria (opcional)"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={handleDialogClose}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit">
+                    {editingCategory ? 'Atualizar' : 'Criar'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Categories Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Categorias ({filteredCategories.length})</CardTitle>
+            <CardDescription>
+              Gerencie as categorias dos produtos
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {filteredCategories.length === 0 ? (
+              <div className="text-center py-8">
+                <Tag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">
+                  {searchQuery ? 'Nenhuma categoria encontrada.' : 'Nenhuma categoria criada ainda.'}
+                </p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Criado em</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-       <CartDrawer
+                </TableHeader>
+                <TableBody>
+                  {filteredCategories.map((category) => (
+                    <TableRow key={category.id}>
+                      <TableCell className="font-medium">
+                        {category.name}
+                      </TableCell>
+                      <TableCell>
+                        {category.description || 'Sem descrição'}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(category.created_at).toLocaleDateString('pt-BR')}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(category)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setIdForDeleteCategory(category.id)
+                              setShowAlert(true)
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
       />

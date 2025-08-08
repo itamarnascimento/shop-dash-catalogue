@@ -1,32 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
-import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
+import { loadProducts } from '@/data/products';
 import { useToast } from '@/hooks/use-toast';
-import { products } from '@/data/products';
-import { Product } from '@/types/product';
+import { ProductDB } from '@/types/database';
+import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 const Wishlist: React.FC = () => {
-  const [wishlistProducts, setWishlistProducts] = useState<Product[]>([]);
+  const [wishlistProducts, setWishlistProducts] = useState<ProductDB[]>([]);
   const { user } = useAuth();
   const { wishlistItems, removeFromWishlist, loading } = useWishlist();
   const { addToCart } = useCart();
   const { toast } = useToast();
 
+
+  const findProducts = async () => {
+    try {
+      const data = await loadProducts()
+      // Buscar produtos completos baseados nos IDs da wishlist
+      const fullProducts = wishlistItems
+        .map(item => data.find(p => p.id === item.id))
+        .filter(Boolean) as ProductDB[];
+
+      setWishlistProducts(fullProducts);
+    } catch (error) {
+      console.error('Erro ao carregar produtos:', error);
+    }
+  };
+
+
   useEffect(() => {
-    // Buscar produtos completos baseados nos IDs da wishlist
-    const fullProducts = wishlistItems
-      .map(item => products.find(p => p.id === item.product_id))
-      .filter(Boolean) as Product[];
-    
-    setWishlistProducts(fullProducts);
+    findProducts()
   }, [wishlistItems]);
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: ProductDB) => {
     addToCart(product);
     toast({
       title: "Produto adicionado!",
@@ -93,7 +104,7 @@ const Wishlist: React.FC = () => {
             <p className="text-muted-foreground mb-4">
               Adicione produtos à sua lista de desejos clicando no ícone de coração
             </p>
-            <Button 
+            <Button
               onClick={() => window.location.href = '/'}
               className="bg-gradient-to-r from-primary to-warm-coral hover:shadow-warm"
             >
@@ -108,7 +119,7 @@ const Wishlist: React.FC = () => {
               <CardContent className="p-0">
                 <div className="relative overflow-hidden">
                   <img
-                    src={product.image}
+                    src={product.image_url}
                     alt={product.name}
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -121,14 +132,14 @@ const Wishlist: React.FC = () => {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className="bg-secondary/90 backdrop-blur-sm text-secondary-foreground font-medium"
                     >
                       {product.category}
                     </Badge>
                   </div>
-                  {!product.inStock && (
+                  {!product.in_stock && (
                     <div className="absolute inset-0 bg-muted/80 backdrop-blur-sm flex items-center justify-center">
                       <Badge variant="destructive" className="text-sm px-4 py-2">
                         Fora de Estoque
@@ -155,14 +166,14 @@ const Wishlist: React.FC = () => {
                       ou 12x de {formatPrice(product.price / 12)} sem juros
                     </div>
                   </div>
-                  
-                  <Button 
-                    onClick={() => handleAddToCart(product)} 
-                    disabled={!product.inStock}
+
+                  <Button
+                    onClick={() => handleAddToCart(product)}
+                    disabled={!product.in_stock}
                     className="w-full bg-gradient-to-r from-primary to-warm-coral hover:from-primary/90 hover:to-warm-coral/90 hover:shadow-warm transition-all duration-300 transform hover:scale-[1.02]"
                   >
                     <ShoppingCart className="w-4 h-4 mr-2" />
-                    {product.inStock ? 'Adicionar ao Carrinho' : 'Indisponível'}
+                    {product.in_stock ? 'Adicionar ao Carrinho' : 'Indisponível'}
                   </Button>
                 </div>
               </CardContent>

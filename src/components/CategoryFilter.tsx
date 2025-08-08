@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { categories } from '@/data/products';
+import { Categories } from '@/types/database';
+import { loadCategories } from '@/data/categories';
 
 interface CategoryFilterProps {
   selectedCategory: string;
@@ -11,20 +12,28 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
   selectedCategory,
   onCategoryChange,
 }) => {
+  const [categories, setCategories] = useState<Categories[]>([])
+  const getCategories = async () => {
+    const data = await loadCategories()
+    setCategories(data || [])
+  }
+
+  useEffect(() => { getCategories() }, [])
+
   return (
     <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
       {categories.map((category) => (
         <Button
-          key={category}
-          variant={selectedCategory === category ? "default" : "outline"}
-          onClick={() => onCategoryChange(category)}
+          key={category.id}
+          variant={selectedCategory === category.name ? "default" : "outline"}
+          onClick={() => onCategoryChange(category.name)}
           className={
-            selectedCategory === category
+            selectedCategory === category.name
               ? "bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90"
               : ""
           }
         >
-          {category}
+          {category.name}
         </Button>
       ))}
     </div>
