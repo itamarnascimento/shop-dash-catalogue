@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Package, Upload } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { AlertConfirm } from '@/components/Alert/Alert';
+import CartDrawer from '@/components/CartDrawer';
+import Header from '@/components/Header';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
+import { loadCategories } from '@/data/categories';
+import { loadProducts } from '@/data/products';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Categories, ProductDB } from '@/types/database';
-import CartDrawer from '@/components/CartDrawer';
-import Header from '@/components/Header';
-import { loadProducts } from '@/data/products';
-import { loadCategories } from '@/data/categories';
-import { AlertConfirm } from '@/components/Alert/Alert';
+import { UploadFile } from '@/Utils';
+import { Edit, Package, Plus, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {v4 as uuidV4} from 'uuid'
 
 const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<ProductDB[]>([]);
@@ -35,6 +37,7 @@ const ProductManagement: React.FC = () => {
     image_url: '',
     category_id: '',
     in_stock: true,
+    file: null as File | null
   });
 
 
@@ -85,6 +88,7 @@ const ProductManagement: React.FC = () => {
       image_url: '',
       category_id: '',
       in_stock: true,
+      file: null
     });
     setEditingProduct(null);
   };
@@ -98,6 +102,7 @@ const ProductManagement: React.FC = () => {
       image_url: product.image_url,
       category_id: product.category_id,
       in_stock: product.in_stock,
+      file: null
     });
     setIsDialogOpen(true);
   };
@@ -116,11 +121,26 @@ const ProductManagement: React.FC = () => {
 
     setLoading(true);
     try {
+      let urlImage = null
+      if (formData.file) {
+        const fileExt = formData.file.name.split(".").pop()
+        const uniqueName = uuidV4()
+        const filePath = `products/${uniqueName}.${fileExt}`
+        const responseUpload = await UploadFile({ bucketName: "imagens", filePath, file: formData.file })
+        if (responseUpload.path) {
+          const urlPublic = supabase.storage
+            .from('imagens')
+            .getPublicUrl(filePath)
+
+          urlImage = urlPublic.data.publicUrl
+        }
+      }
+
       const productData = {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
-        image_url: formData.image_url || 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=400&fit=crop',
+        image_url: urlImage || 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=400&fit=crop',
         category_id: formData.category_id,
         in_stock: formData.in_stock,
       };
@@ -167,8 +187,9 @@ const ProductManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (productId: string) => {   
+  const handleDelete = async (productId: string) => {
     try {
+      setShowAlert(false)
       const { error } = await supabase
         .from('products')
         .delete()
@@ -300,13 +321,11 @@ const ProductManagement: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="image_url">URL da Imagem</Label>
+                    <Label htmlFor="file">Imagem</Label>
                     <Input
-                      id="image_url"
-                      type="url"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      placeholder="https://exemplo.com/imagem.jpg"
+                      id="file"
+                      type="file"
+                      onChange={(e) => { setFormData({ ...formData, file: e.target.files?.[0] }) }}
                     />
                   </div>
                 </div>
