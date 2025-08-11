@@ -22,18 +22,6 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
 
   return (
     <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-      <Button
-          key={1}
-          variant={selectedCategory === 'Todos' ? "default" : "outline"}
-          onClick={() => onCategoryChange('Todos')}
-          className={
-            selectedCategory === 'Todos'
-              ? "bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90"
-              : ""
-          }
-        >
-          Todos
-        </Button>
       {categories.map((category) => (
         <Button
           key={category.id}
