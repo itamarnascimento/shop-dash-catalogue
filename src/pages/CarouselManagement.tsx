@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import CartDrawer from '@/components/CartDrawer';
+import Header from '@/components/Header';
+import { Loading } from '@/components/Loading';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Trash2, Edit, Plus, ArrowUp, ArrowDown, Image } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import Header from '@/components/Header';
-import CartDrawer from '@/components/CartDrawer';
-
+import { supabase } from '@/integrations/supabase/client';
+import { imageCompressionProcess, UploadFile } from '@/Utils';
+import { ArrowDown, ArrowUp, Edit, Image, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { v4 as uuidV4 } from 'uuid';
 interface CarouselImage {
   id: string;
   url: string;
@@ -35,7 +36,8 @@ const CarouselManagement = () => {
     alt_text: '',
     title: '',
     order_position: 0,
-    is_active: true
+    is_active: true,
+    file: null as File | null
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { toast } = useToast();
@@ -66,10 +68,26 @@ const CarouselManagement = () => {
 
   const handleSave = async () => {
     try {
+      setLoading(true)
+      let responseUpload = null
+      if (formData.file) {
+        const fileExt = formData.file.name.split(".").pop()
+        const uniqueName = uuidV4()
+        const filePath = `carousel/${uniqueName}.webp`
+        const imageCompress = await imageCompressionProcess(formData.file)
+        const webpFile = new File([imageCompress], formData.file.name.replace(/\.[^/.]+$/, ".webp"), {
+          type: 'image/webp'
+        });
+        responseUpload = await UploadFile({ bucketName: "imagens", filePath, file: webpFile })
+      }
+
+      delete formData.file
+
+      const payload = { ...formData, url: responseUpload?.urlImage || formData.url || "" }
       if (editingImage) {
         const { error } = await supabase
           .from('carousel_images')
-          .update(formData)
+          .update(payload)
           .eq('id', editingImage.id);
 
         if (error) throw error;
@@ -80,7 +98,7 @@ const CarouselManagement = () => {
       } else {
         const { error } = await supabase
           .from('carousel_images')
-          .insert([formData]);
+          .insert([payload]);
 
         if (error) throw error;
         toast({
@@ -98,6 +116,8 @@ const CarouselManagement = () => {
         description: "Erro ao salvar imagem: " + error.message,
         variant: "destructive"
       });
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -156,7 +176,8 @@ const CarouselManagement = () => {
       alt_text: '',
       title: '',
       order_position: Math.max(...images.map(img => img.order_position), 0) + 1,
-      is_active: true
+      is_active: true,
+      file: null
     });
     setEditingImage(null);
   };
@@ -169,7 +190,8 @@ const CarouselManagement = () => {
         alt_text: image.alt_text,
         title: image.title || '',
         order_position: image.order_position,
-        is_active: image.is_active
+        is_active: image.is_active,
+        file: null
       });
     } else {
       resetForm();
@@ -177,22 +199,15 @@ const CarouselManagement = () => {
     setDialogOpen(true);
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
+
       <Header
         onCartClick={() => setIsCartOpen(true)}
       />
       <div className="container mx-auto px-4 py-8 space-y-8">
+        {loading && <Loading />}
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Gerenciar Carrossel</h1>
@@ -218,12 +233,11 @@ const CarouselManagement = () => {
 
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="url">URL da Imagem</Label>
+                  <Label htmlFor="file">Imagem</Label>
                   <Input
-                    id="url"
-                    value={formData.url}
-                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                    placeholder="https://exemplo.com/imagem.jpg"
+                    id="file"
+                    type='file'
+                    onChange={(e) => setFormData({ ...formData, file: e.target.files?.[0] })}
                   />
                 </div>
 
@@ -384,10 +398,10 @@ const CarouselManagement = () => {
           </CardContent>
         </Card>
       </div>
-        <CartDrawer
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-        />
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </div>
   );
 };

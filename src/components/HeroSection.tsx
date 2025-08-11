@@ -1,12 +1,11 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { ShoppingBag, Zap } from 'lucide-react';
 import HeroCarousel from '@/components/HeroCarousel';
+import { ShoppingBag, Zap } from 'lucide-react';
+import React from 'react';
 
 const HeroSection: React.FC = () => {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-secondary">
-      <div className="container mx-auto px-4 py-20 lg:py-32">
+      <div className="container mx-auto px-4 py-10 lg:py-16">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div className="space-y-8">
@@ -15,22 +14,21 @@ const HeroSection: React.FC = () => {
                 <Zap className="w-4 h-4" />
                 <span>Novos produtos chegando</span>
               </div>
-              
+
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
-                A melhor 
+                A melhor qualidade em,
                 <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
-                  {" "}tecnologia{" "}
+                  {" "}Sublimação{" "}
                 </span>
-                ao seu alcance
+                feita para você!
               </h1>
-              
+
               <p className="text-xl text-muted-foreground max-w-lg">
-                Descubra os produtos mais inovadores do mercado com qualidade premium 
-                e os melhores preços.
+                Transforme suas ideias em produtos únicos com sublimação de alta qualidade e o melhor preço do mercado.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            {/* <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90"
@@ -42,7 +40,7 @@ const HeroSection: React.FC = () => {
               <Button variant="outline" size="lg">
                 Ver Ofertas
               </Button>
-            </div>
+            </div> */}
 
             {/* Stats */}
             <div className="flex items-center space-x-8 pt-8">
@@ -66,7 +64,7 @@ const HeroSection: React.FC = () => {
             <div className="relative shadow-2xl">
               <HeroCarousel />
             </div>
-            
+
             {/* Floating card */}
             <div className="absolute -bottom-6 -left-6 bg-card/95 backdrop-blur-md border border-border rounded-lg p-4 shadow-lg">
               <div className="flex items-center space-x-3">
@@ -75,7 +73,7 @@ const HeroSection: React.FC = () => {
                 </div>
                 <div>
                   <div className="font-semibold text-foreground">Entrega Grátis</div>
-                  <div className="text-sm text-muted-foreground">Em compras acima de R$ 299</div>
+                  <div className="text-sm text-muted-foreground">Em compras acima de R$ 50</div>
                 </div>
               </div>
             </div>
