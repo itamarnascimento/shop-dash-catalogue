@@ -1,6 +1,7 @@
 import { AlertConfirm } from '@/components/Alert/Alert';
 import CartDrawer from '@/components/CartDrawer';
 import Header from '@/components/Header';
+import { Loading } from '@/components/Loading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,10 +17,10 @@ import { loadProducts } from '@/data/products';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Categories, ProductDB } from '@/types/database';
-import { UploadFile } from '@/Utils';
+import { imageCompressionProcess, UploadFile } from '@/Utils';
 import { Edit, Package, Plus, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {v4 as uuidV4} from 'uuid'
+import { v4 as uuidV4 } from 'uuid'
 
 const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<ProductDB[]>([]);
@@ -125,22 +126,21 @@ const ProductManagement: React.FC = () => {
       if (formData.file) {
         const fileExt = formData.file.name.split(".").pop()
         const uniqueName = uuidV4()
-        const filePath = `products/${uniqueName}.${fileExt}`
-        const responseUpload = await UploadFile({ bucketName: "imagens", filePath, file: formData.file })
-        if (responseUpload.path) {
-          const urlPublic = supabase.storage
-            .from('imagens')
-            .getPublicUrl(filePath)
+        const filePath = `products/${uniqueName}.webp`
+        const imageCompress = await imageCompressionProcess(formData.file)
+        const webpFile = new File([imageCompress], formData.file.name.replace(/\.[^/.]+$/, ".webp"), {
+          type: 'image/webp'
+        });
+        const responseUpload = await UploadFile({ bucketName: "imagens", filePath, file: webpFile })
 
-          urlImage = urlPublic.data.publicUrl
-        }
+        urlImage = responseUpload?.urlImage
       }
 
       const productData = {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
-        image_url: urlImage || 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=400&fit=crop',
+        image_url: urlImage || formData.image_url || 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=400&fit=crop',
         category_id: formData.category_id,
         in_stock: formData.in_stock,
       };
@@ -233,6 +233,7 @@ const ProductManagement: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {loading && <Loading />}
       <Header
         onCartClick={() => setIsCartOpen(true)}
       />
@@ -352,7 +353,7 @@ const ProductManagement: React.FC = () => {
                     disabled={loading}
                     className="bg-gradient-to-r from-primary to-warm-coral"
                   >
-                    {loading ? 'Salvando...' : editingProduct ? 'Atualizar' : 'Criar'}
+                    {editingProduct ? 'Atualizar' : 'Criar'}
                   </Button>
                 </div>
               </form>
