@@ -175,7 +175,7 @@ const Checkout: React.FC = () => {
         order_id: order.id,
         product_id: item.product.id,
         product_name: item.product.name,
-        product_image: item.product.image,
+        product_image: item.product.image_url,
         quantity: item.quantity,
         unit_price: item.product.price,
         total_price: item.product.price * item.quantity
@@ -375,7 +375,7 @@ const Checkout: React.FC = () => {
                 {items.map((item) => (
                   <div key={item.product.id} className="flex items-center gap-3">
                     <img
-                      src={item.product.image}
+                      src={item.product.image_url}
                       alt={item.product.name}
                       className="w-16 h-16 object-cover rounded"
                     />
