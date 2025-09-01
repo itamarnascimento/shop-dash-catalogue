@@ -156,47 +156,34 @@ const Checkout: React.FC = () => {
     setLoading(true);
 
     try {
-      // Criar o pedido
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user.id,
+      // Create Stripe checkout session
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          items,
           total_amount: getFinalPrice(),
           shipping_address: shippingAddress,
-          status: 'pending'
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Criar os itens do pedido
-      const orderItems = items.map(item => ({
-        order_id: order.id,
-        product_id: item.product.id,
-        product_name: item.product.name,
-        product_image: item.product.image_url,
-        quantity: item.quantity,
-        unit_price: item.product.price,
-        total_price: item.product.price * item.quantity
-      }));
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      // Limpar o carrinho
-      clearCart();
-
-      toast({
-        title: "Pedido realizado com sucesso!",
-        description: `Seu pedido #${order.id.slice(0, 8)} foi criado`,
+        }
       });
 
-      // Redirecionar para a página de pedidos
-      navigate('/orders');
+      if (error) throw error;
+
+      if (data?.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error("Não foi possível criar a sessão de pagamento");
+      }
+
+    } catch (error) {
+      console.error('Erro ao finalizar compra:', error);
+      toast({
+        title: "Erro na compra",
+        description: "Ocorreu um erro ao processar sua compra. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
     } catch (error) {
       console.error('Erro ao finalizar compra:', error);
       toast({
