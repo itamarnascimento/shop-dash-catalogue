@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard, MapPin, User, Plus, Check, Tag, X } from 'lucide-react';
+import { ArrowLeft, CreditCard, MapPin, User, Plus, Check, Tag, X, Smartphone, Receipt, Building2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,7 @@ const Checkout: React.FC = () => {
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [useNewAddress, setUseNewAddress] = useState(false);
   const [couponCode, setCouponCode] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('credit_card');
   
   const [shippingAddress, setShippingAddress] = useState({
     name: '',
@@ -156,22 +157,39 @@ const Checkout: React.FC = () => {
     setLoading(true);
 
     try {
-      // Create Stripe checkout session
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: {
-          items,
-          total_amount: getFinalPrice(),
-          shipping_address: shippingAddress,
+      if (paymentMethod === 'credit_card') {
+        // Create Stripe checkout session
+        const { data, error } = await supabase.functions.invoke('create-checkout', {
+          body: {
+            items,
+            total_amount: getFinalPrice(),
+            shipping_address: shippingAddress,
+            payment_method: 'credit_card'
+          }
+        });
+
+        if (error) throw error;
+
+        if (data?.url) {
+          // Redirect to Stripe checkout
+          window.location.href = data.url;
+        } else {
+          throw new Error("Não foi possível criar a sessão de pagamento");
         }
-      });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        // Redirect to Stripe checkout
-        window.location.href = data.url;
-      } else {
-        throw new Error("Não foi possível criar a sessão de pagamento");
+      } else if (paymentMethod === 'pix') {
+        // Handle PIX payment
+        toast({
+          title: "PIX em desenvolvimento",
+          description: "A funcionalidade PIX será implementada em breve.",
+          variant: "default",
+        });
+      } else if (paymentMethod === 'boleto') {
+        // Handle Boleto payment
+        toast({
+          title: "Boleto em desenvolvimento", 
+          description: "A funcionalidade Boleto será implementada em breve.",
+          variant: "default",
+        });
       }
 
     } catch (error) {
@@ -413,6 +431,99 @@ const Checkout: React.FC = () => {
 
                 <Separator />
 
+                {/* Forma de Pagamento */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    <Label>Forma de Pagamento</Label>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {/* Cartão de Crédito/Débito */}
+                    <div
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        paymentMethod === 'credit_card'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-muted-foreground/20 hover:border-primary/50'
+                      }`}
+                      onClick={() => setPaymentMethod('credit_card')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded-full border-2 ${
+                          paymentMethod === 'credit_card' 
+                            ? 'border-primary bg-primary' 
+                            : 'border-muted-foreground/30'
+                        }`}>
+                          {paymentMethod === 'credit_card' && (
+                            <div className="w-full h-full rounded-full bg-background scale-50"></div>
+                          )}
+                        </div>
+                        <CreditCard className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <div className="font-medium">Cartão de Crédito/Débito</div>
+                          <div className="text-sm text-muted-foreground">Visa, Mastercard, Elo</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* PIX */}
+                    <div
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        paymentMethod === 'pix'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-muted-foreground/20 hover:border-primary/50'
+                      }`}
+                      onClick={() => setPaymentMethod('pix')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded-full border-2 ${
+                          paymentMethod === 'pix' 
+                            ? 'border-primary bg-primary' 
+                            : 'border-muted-foreground/30'
+                        }`}>
+                          {paymentMethod === 'pix' && (
+                            <div className="w-full h-full rounded-full bg-background scale-50"></div>
+                          )}
+                        </div>
+                        <Smartphone className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <div className="font-medium">PIX</div>
+                          <div className="text-sm text-muted-foreground">Pagamento instantâneo</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Boleto */}
+                    <div
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        paymentMethod === 'boleto'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-muted-foreground/20 hover:border-primary/50'
+                      }`}
+                      onClick={() => setPaymentMethod('boleto')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded-full border-2 ${
+                          paymentMethod === 'boleto' 
+                            ? 'border-primary bg-primary' 
+                            : 'border-muted-foreground/30'
+                        }`}>
+                          {paymentMethod === 'boleto' && (
+                            <div className="w-full h-full rounded-full bg-background scale-50"></div>
+                          )}
+                        </div>
+                        <Receipt className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <div className="font-medium">Boleto Bancário</div>
+                          <div className="text-sm text-muted-foreground">Vencimento em 3 dias úteis</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
                 {/* Totais */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
@@ -443,7 +554,11 @@ const Checkout: React.FC = () => {
                   onClick={handleFinalizePurchase}
                   disabled={loading}
                 >
-                  {loading ? 'Processando...' : 'Finalizar Compra'}
+                  {loading ? 'Processando...' : 
+                    paymentMethod === 'credit_card' ? 'Pagar com Cartão' :
+                    paymentMethod === 'pix' ? 'Gerar PIX' :
+                    'Gerar Boleto'
+                  }
                 </Button>
                 
                 <p className="text-xs text-center text-muted-foreground mt-2">
