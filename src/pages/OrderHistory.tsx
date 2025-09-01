@@ -57,7 +57,7 @@ const OrderHistory: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders((data || []) as OrderWithItems[]);
+      setOrders((data || []) as any[]);
     } catch (error) {
       console.error('Erro ao carregar histórico:', error);
     } finally {

@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -219,7 +219,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -307,6 +315,7 @@ export type Database = {
           id: string
           shipping_address: Json
           status: string
+          stripe_session_id: string | null
           total_amount: number
           updated_at: string
           user_id: string
@@ -316,6 +325,7 @@ export type Database = {
           id?: string
           shipping_address: Json
           status?: string
+          stripe_session_id?: string | null
           total_amount: number
           updated_at?: string
           user_id: string
@@ -325,6 +335,7 @@ export type Database = {
           id?: string
           shipping_address?: Json
           status?: string
+          stripe_session_id?: string | null
           total_amount?: number
           updated_at?: string
           user_id?: string
@@ -539,8 +550,8 @@ export type Database = {
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }

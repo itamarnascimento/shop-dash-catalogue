@@ -184,16 +184,6 @@ const Checkout: React.FC = () => {
     } finally {
       setLoading(false);
     }
-    } catch (error) {
-      console.error('Erro ao finalizar compra:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível finalizar a compra. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
   };
 
   if (!user) {
