@@ -308,6 +308,19 @@ const ProductManagement: React.FC = () => {
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="sizes">Tamanhos Disponíveis (separados por vírgula)</Label>
+                  <Input
+                    id="sizes"
+                    value={formData.sizes.join(', ')}
+                    onChange={(e) => {
+                      const sizesArray = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                      setFormData({ ...formData, sizes: sizesArray });
+                    }}
+                    placeholder="P, M, G, GG ou deixe vazio se não aplicável"
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="price">Preço (R$) *</Label>

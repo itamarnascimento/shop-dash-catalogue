@@ -53,6 +53,7 @@ export type Database = {
           id: string
           product_id: string
           quantity: number
+          selected_size: string | null
           updated_at: string
           user_id: string
         }
@@ -61,6 +62,7 @@ export type Database = {
           id?: string
           product_id: string
           quantity?: number
+          selected_size?: string | null
           updated_at?: string
           user_id: string
         }
@@ -69,6 +71,7 @@ export type Database = {
           id?: string
           product_id?: string
           quantity?: number
+          selected_size?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -274,6 +277,7 @@ export type Database = {
           product_image: string
           product_name: string
           quantity: number
+          selected_size: string | null
           total_price: number
           unit_price: number
         }
@@ -285,6 +289,7 @@ export type Database = {
           product_image: string
           product_name: string
           quantity?: number
+          selected_size?: string | null
           total_price: number
           unit_price: number
         }
@@ -296,6 +301,7 @@ export type Database = {
           product_image?: string
           product_name?: string
           quantity?: number
+          selected_size?: string | null
           total_price?: number
           unit_price?: number
         }
@@ -312,6 +318,7 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          desired_delivery_date: string | null
           id: string
           shipping_address: Json
           status: string
@@ -322,6 +329,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          desired_delivery_date?: string | null
           id?: string
           shipping_address: Json
           status?: string
@@ -332,6 +340,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          desired_delivery_date?: string | null
           id?: string
           shipping_address?: Json
           status?: string
@@ -352,6 +361,7 @@ export type Database = {
           in_stock: boolean
           name: string
           price: number
+          sizes: Json | null
           updated_at: string
         }
         Insert: {
@@ -363,6 +373,7 @@ export type Database = {
           in_stock?: boolean
           name: string
           price: number
+          sizes?: Json | null
           updated_at?: string
         }
         Update: {
@@ -374,6 +385,7 @@ export type Database = {
           in_stock?: boolean
           name?: string
           price?: number
+          sizes?: Json | null
           updated_at?: string
         }
         Relationships: [
