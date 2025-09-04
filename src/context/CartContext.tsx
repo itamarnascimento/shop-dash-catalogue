@@ -269,7 +269,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         return false;
       }
 
-      setAppliedCoupon(coupon);
+      setAppliedCoupon(coupon as Coupon);
       toast({
         title: 'Cupom aplicado',
         description: `Desconto de ${coupon.discount_type === 'percentage' ? coupon.discount_value + '%' : 'R$ ' + coupon.discount_value.toFixed(2)} aplicado!`,

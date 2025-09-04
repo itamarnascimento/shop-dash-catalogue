@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard, MapPin, User, Plus, Check, Tag, X, Smartphone, Receipt, Building2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, MapPin, User, Plus, Check, Tag, X, Smartphone, Receipt, Building2, CalendarIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,10 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +28,7 @@ const Checkout: React.FC = () => {
   const [useNewAddress, setUseNewAddress] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('credit_card');
+  const [desiredDate, setDesiredDate] = useState<Date>();
   
   const [shippingAddress, setShippingAddress] = useState({
     name: '',
@@ -353,6 +358,35 @@ const Checkout: React.FC = () => {
                   </div>
                 </>
               )}
+              
+              {/* Campo de Data Desejada */}
+              <div className="space-y-2">
+                <Label htmlFor="desired-date">Data Desejada para Recebimento</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !desiredDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {desiredDate ? format(desiredDate, "dd/MM/yyyy") : <span>Selecione uma data</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={desiredDate}
+                      onSelect={setDesiredDate}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </CardContent>
           </Card>
 
