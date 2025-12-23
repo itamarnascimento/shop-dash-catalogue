@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard, MapPin, User, Plus, Check, Tag, X } from 'lucide-react';
+import { ArrowLeft, CreditCard, MapPin, User, Plus, Check, Tag, X, Smartphone, Receipt, Building2, CalendarIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,10 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
@@ -23,6 +27,8 @@ const Checkout: React.FC = () => {
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [useNewAddress, setUseNewAddress] = useState(false);
   const [couponCode, setCouponCode] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('credit_card');
+  const [desiredDate, setDesiredDate] = useState<Date>();
   
   const [shippingAddress, setShippingAddress] = useState({
     name: '',
@@ -156,52 +162,46 @@ const Checkout: React.FC = () => {
     setLoading(true);
 
     try {
-      // Criar o pedido
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user.id,
-          total_amount: getFinalPrice(),
-          shipping_address: shippingAddress,
-          status: 'pending'
-        })
-        .select()
-        .single();
+      if (paymentMethod === 'credit_card') {
+        // Create Stripe checkout session
+        const { data, error } = await supabase.functions.invoke('create-checkout', {
+          body: {
+            items,
+            total_amount: getFinalPrice(),
+            shipping_address: shippingAddress,
+            payment_method: 'credit_card'
+          }
+        });
 
-      if (orderError) throw orderError;
+        if (error) throw error;
 
-      // Criar os itens do pedido
-      const orderItems = items.map(item => ({
-        order_id: order.id,
-        product_id: item.product.id,
-        product_name: item.product.name,
-        product_image: item.product.image,
-        quantity: item.quantity,
-        unit_price: item.product.price,
-        total_price: item.product.price * item.quantity
-      }));
+        if (data?.url) {
+          // Redirect to Stripe checkout
+          window.location.href = data.url;
+        } else {
+          throw new Error("Não foi possível criar a sessão de pagamento");
+        }
+      } else if (paymentMethod === 'pix') {
+        // Handle PIX payment
+        toast({
+          title: "PIX em desenvolvimento",
+          description: "A funcionalidade PIX será implementada em breve.",
+          variant: "default",
+        });
+      } else if (paymentMethod === 'boleto') {
+        // Handle Boleto payment
+        toast({
+          title: "Boleto em desenvolvimento", 
+          description: "A funcionalidade Boleto será implementada em breve.",
+          variant: "default",
+        });
+      }
 
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      // Limpar o carrinho
-      clearCart();
-
-      toast({
-        title: "Pedido realizado com sucesso!",
-        description: `Seu pedido #${order.id.slice(0, 8)} foi criado`,
-      });
-
-      // Redirecionar para a página de pedidos
-      navigate('/orders');
     } catch (error) {
       console.error('Erro ao finalizar compra:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível finalizar a compra. Tente novamente.",
+        title: "Erro na compra",
+        description: "Ocorreu um erro ao processar sua compra. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -358,6 +358,35 @@ const Checkout: React.FC = () => {
                   </div>
                 </>
               )}
+              
+              {/* Campo de Data Desejada */}
+              <div className="space-y-2">
+                <Label htmlFor="desired-date">Data Desejada para Recebimento</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !desiredDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {desiredDate ? format(desiredDate, "dd/MM/yyyy") : <span>Selecione uma data</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={desiredDate}
+                      onSelect={setDesiredDate}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </CardContent>
           </Card>
 
@@ -375,7 +404,7 @@ const Checkout: React.FC = () => {
                 {items.map((item) => (
                   <div key={item.product.id} className="flex items-center gap-3">
                     <img
-                      src={item.product.image}
+                      src={item.product.image_url}
                       alt={item.product.name}
                       className="w-16 h-16 object-cover rounded"
                     />
@@ -436,6 +465,99 @@ const Checkout: React.FC = () => {
 
                 <Separator />
 
+                {/* Forma de Pagamento */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    <Label>Forma de Pagamento</Label>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {/* Cartão de Crédito/Débito */}
+                    <div
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        paymentMethod === 'credit_card'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-muted-foreground/20 hover:border-primary/50'
+                      }`}
+                      onClick={() => setPaymentMethod('credit_card')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded-full border-2 ${
+                          paymentMethod === 'credit_card' 
+                            ? 'border-primary bg-primary' 
+                            : 'border-muted-foreground/30'
+                        }`}>
+                          {paymentMethod === 'credit_card' && (
+                            <div className="w-full h-full rounded-full bg-background scale-50"></div>
+                          )}
+                        </div>
+                        <CreditCard className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <div className="font-medium">Cartão de Crédito/Débito</div>
+                          <div className="text-sm text-muted-foreground">Visa, Mastercard, Elo</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* PIX */}
+                    <div
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        paymentMethod === 'pix'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-muted-foreground/20 hover:border-primary/50'
+                      }`}
+                      onClick={() => setPaymentMethod('pix')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded-full border-2 ${
+                          paymentMethod === 'pix' 
+                            ? 'border-primary bg-primary' 
+                            : 'border-muted-foreground/30'
+                        }`}>
+                          {paymentMethod === 'pix' && (
+                            <div className="w-full h-full rounded-full bg-background scale-50"></div>
+                          )}
+                        </div>
+                        <Smartphone className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <div className="font-medium">PIX</div>
+                          <div className="text-sm text-muted-foreground">Pagamento instantâneo</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Boleto */}
+                    <div
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        paymentMethod === 'boleto'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-muted-foreground/20 hover:border-primary/50'
+                      }`}
+                      onClick={() => setPaymentMethod('boleto')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded-full border-2 ${
+                          paymentMethod === 'boleto' 
+                            ? 'border-primary bg-primary' 
+                            : 'border-muted-foreground/30'
+                        }`}>
+                          {paymentMethod === 'boleto' && (
+                            <div className="w-full h-full rounded-full bg-background scale-50"></div>
+                          )}
+                        </div>
+                        <Receipt className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <div className="font-medium">Boleto Bancário</div>
+                          <div className="text-sm text-muted-foreground">Vencimento em 3 dias úteis</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
                 {/* Totais */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
@@ -466,7 +588,11 @@ const Checkout: React.FC = () => {
                   onClick={handleFinalizePurchase}
                   disabled={loading}
                 >
-                  {loading ? 'Processando...' : 'Finalizar Compra'}
+                  {loading ? 'Processando...' : 
+                    paymentMethod === 'credit_card' ? 'Pagar com Cartão' :
+                    paymentMethod === 'pix' ? 'Gerar PIX' :
+                    'Gerar Boleto'
+                  }
                 </Button>
                 
                 <p className="text-xs text-center text-muted-foreground mt-2">

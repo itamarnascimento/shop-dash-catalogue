@@ -31,14 +31,24 @@ const ProductManagement: React.FC = () => {
   const [idForDeleteProduct, setIdForDeleteProduct] = useState("")
   const [showAlert, setShowAlert] = useState(false)
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    price: string;
+    image_url: string;
+    category_id: string;
+    in_stock: boolean;
+    sizes: string[];
+    file: File | null;
+  }>({
     name: '',
     description: '',
     price: '',
     image_url: '',
     category_id: '',
     in_stock: true,
-    file: null as File | null
+    sizes: [],
+    file: null
   });
 
 
@@ -89,6 +99,7 @@ const ProductManagement: React.FC = () => {
       image_url: '',
       category_id: '',
       in_stock: true,
+      sizes: [],
       file: null
     });
     setEditingProduct(null);
@@ -96,6 +107,7 @@ const ProductManagement: React.FC = () => {
 
   const openEditDialog = (product: ProductDB) => {
     setEditingProduct(product);
+    const sizes = Array.isArray(product.sizes) ? product.sizes : [];
     setFormData({
       name: product.name,
       description: product.description,
@@ -103,6 +115,7 @@ const ProductManagement: React.FC = () => {
       image_url: product.image_url,
       category_id: product.category_id,
       in_stock: product.in_stock,
+      sizes: sizes,
       file: null
     });
     setIsDialogOpen(true);
@@ -143,6 +156,7 @@ const ProductManagement: React.FC = () => {
         image_url: urlImage || formData.image_url || 'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=400&fit=crop',
         category_id: formData.category_id,
         in_stock: formData.in_stock,
+        sizes: formData.sizes,
       };
 
       if (editingProduct) {
@@ -307,6 +321,19 @@ const ProductManagement: React.FC = () => {
                     required
                   />
                 </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="sizes">Tamanhos Disponíveis (separados por vírgula)</Label>
+                    <Input
+                      id="sizes"
+                      value={(formData.sizes || []).join(', ')}
+                      onChange={(e) => {
+                        const sizesArray = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                        setFormData({ ...formData, sizes: sizesArray });
+                      }}
+                      placeholder="P, M, G, GG ou deixe vazio se não aplicável"
+                    />
+                  </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">

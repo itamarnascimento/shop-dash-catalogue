@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -53,6 +53,7 @@ export type Database = {
           id: string
           product_id: string
           quantity: number
+          selected_size: string | null
           updated_at: string
           user_id: string
         }
@@ -61,6 +62,7 @@ export type Database = {
           id?: string
           product_id: string
           quantity?: number
+          selected_size?: string | null
           updated_at?: string
           user_id: string
         }
@@ -69,6 +71,7 @@ export type Database = {
           id?: string
           product_id?: string
           quantity?: number
+          selected_size?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -219,7 +222,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -266,6 +277,7 @@ export type Database = {
           product_image: string
           product_name: string
           quantity: number
+          selected_size: string | null
           total_price: number
           unit_price: number
         }
@@ -277,6 +289,7 @@ export type Database = {
           product_image: string
           product_name: string
           quantity?: number
+          selected_size?: string | null
           total_price: number
           unit_price: number
         }
@@ -288,6 +301,7 @@ export type Database = {
           product_image?: string
           product_name?: string
           quantity?: number
+          selected_size?: string | null
           total_price?: number
           unit_price?: number
         }
@@ -304,27 +318,33 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          desired_delivery_date: string | null
           id: string
           shipping_address: Json
           status: string
+          stripe_session_id: string | null
           total_amount: number
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          desired_delivery_date?: string | null
           id?: string
           shipping_address: Json
           status?: string
+          stripe_session_id?: string | null
           total_amount: number
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          desired_delivery_date?: string | null
           id?: string
           shipping_address?: Json
           status?: string
+          stripe_session_id?: string | null
           total_amount?: number
           updated_at?: string
           user_id?: string
@@ -341,6 +361,7 @@ export type Database = {
           in_stock: boolean
           name: string
           price: number
+          sizes: Json | null
           updated_at: string
         }
         Insert: {
@@ -352,6 +373,7 @@ export type Database = {
           in_stock?: boolean
           name: string
           price: number
+          sizes?: Json | null
           updated_at?: string
         }
         Update: {
@@ -363,6 +385,7 @@ export type Database = {
           in_stock?: boolean
           name?: string
           price?: number
+          sizes?: Json | null
           updated_at?: string
         }
         Relationships: [
@@ -539,8 +562,8 @@ export type Database = {
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }

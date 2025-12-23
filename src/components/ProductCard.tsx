@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { WishlistButton } from '@/components/WishlistButton';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
@@ -18,12 +19,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
   const { toast } = useToast();
   const [showReviews, setShowReviews] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string>('');
 
   const handleAddToCart = () => {
-    addToCart(product);
+    const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+    if (sizes.length > 0 && !selectedSize) {
+      toast({
+        title: "Selecione um tamanho",
+        description: "Por favor, selecione um tamanho antes de adicionar ao carrinho.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    addToCart(product, selectedSize || undefined);
     toast({
       title: "Produto adicionado!",
-      description: `${product.name} foi adicionado ao carrinho.`,
+      description: `${product.name}${selectedSize ? ` - Tamanho ${selectedSize}` : ''} foi adicionado ao carrinho.`,
     });
   };
 
@@ -118,6 +130,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 ou 12x de {formatPrice(product.price / 12)} sem juros
               </div>
             </div>
+            
+            {Array.isArray(product.sizes) && product.sizes.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Tamanho:</label>
+                <Select value={selectedSize} onValueChange={setSelectedSize}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tamanho" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {product.sizes.map((size: string) => (
+                      <SelectItem key={size} value={size}>{size}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             
             <Button 
               onClick={handleAddToCart} 

@@ -136,7 +136,7 @@ const Wishlist: React.FC = () => {
                       variant="secondary"
                       className="bg-secondary/90 backdrop-blur-sm text-secondary-foreground font-medium"
                     >
-                      {product.category}
+                      {product.categories?.name || 'Sem categoria'}
                     </Badge>
                   </div>
                   {!product.in_stock && (

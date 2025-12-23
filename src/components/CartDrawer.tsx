@@ -80,7 +80,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                 {items.map((item) => (
                   <div key={item.product.id} className="flex items-center space-x-4 p-4 bg-muted/50 rounded-lg">
                     <img
-                      src={item.product.image}
+                      src={item.product.image_url}
                       alt={item.product.name}
                       className="w-16 h-16 object-cover rounded-md bg-background"
                     />

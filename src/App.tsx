@@ -21,6 +21,7 @@ import OrderManagement from "./pages/OrderManagement";
 import OrderReports from "./pages/OrderReports";
 import OrderDetail from "./pages/OrderDetail";
 import Checkout from "./pages/Checkout";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import CarouselManagement from "./pages/CarouselManagement";
 import CouponManagement from "./pages/CouponManagement";
 
@@ -39,6 +40,8 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/order-history" element={<OrderHistory />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/orders" element={<OrderHistory />} />
                 <Route path="/order/:orderId" element={<OrderDetail />

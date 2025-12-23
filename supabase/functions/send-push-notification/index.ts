@@ -23,7 +23,8 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    // Use as variáveis de ambiente do Supabase Edge Functions
+    const supabaseUrl = "https://vrenmohimskinepiwufd.supabase.co";
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     const vapidPublicKey = 'BKWZrj4xyffEHfCr6_pC1vJT4xPKT5nXPB3-QqW_2--9T-1X-4eF-4eF-4eF-4eF-4eF-4eF-4eF-4eF-4eF-4eF';
@@ -59,9 +60,14 @@ serve(async (req) => {
 
     // Buscar usuários para envio de email
     let usersToEmail = [];
+    console.log('Verificando se Resend está configurado:', !!resend);
+    console.log('RESEND_API_KEY disponível:', !!resendApiKey);
+    
     if (resend) {
+      console.log('Preparando query para buscar usuários...');
       let usersQuery;
       if (send_to_all) {
+        console.log('Enviando para todos os usuários');
         // Para todos: buscar usuários com email e preferências de email ativadas
         usersQuery = supabase
           .from('profiles')
@@ -73,6 +79,7 @@ serve(async (req) => {
           .not('email', 'is', null)
           .eq('notification_preferences.email_notifications', true);
       } else if (user_id) {
+        console.log('Enviando para usuário específico:', user_id);
         // Para usuário específico: verificar se tem email e preferências ativadas
         usersQuery = supabase
           .from('profiles')
@@ -86,15 +93,26 @@ serve(async (req) => {
       }
 
       if (usersQuery) {
+        console.log('Executando query para buscar usuários...');
         const { data: users, error: usersError } = await usersQuery;
+        console.log('Resultado da query - users:', users);
+        console.log('Erro da query - usersError:', usersError);
+        
         if (!usersError && users) {
+          console.log('Usuários encontrados antes do filtro:', users.length);
           // Filtrar usuários que têm email_notifications ativado
           usersToEmail = users.filter(user => {
             const emailPref = user.notification_preferences?.[0]?.email_notifications;
+            console.log(`Usuário ${user.email} - preferência email:`, emailPref);
             return emailPref !== false; // Default true se não especificado
           });
+          console.log('Usuários após filtro:', usersToEmail.length);
+        } else {
+          console.log('Erro ao buscar usuários ou nenhum usuário encontrado');
         }
       }
+    } else {
+      console.log('Resend não configurado - emails não serão enviados');
     }
 
     const hasPushSubscriptions = subscriptions && subscriptions.length > 0;
