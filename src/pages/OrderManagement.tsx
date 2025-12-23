@@ -342,7 +342,7 @@ const OrderManagement = () => {
                                 size="icon"
                                 asChild
                               >
-                                <Link to={`/orders/${order.id}`}>
+                                <Link to={`/order/${order.id}`}>
                                   <Eye className="w-4 h-4" />
                                 </Link>
                               </Button>

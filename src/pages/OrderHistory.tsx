@@ -90,6 +90,7 @@ const OrderHistory: React.FC = () => {
       case 'shipped': return 'Enviado';
       case 'delivered': return 'Recebido';
       case 'cancelled': return 'Cancelado';
+      case 'confirmed': return 'Pagamento Confirmado';
       default: return 'Desconhecido';
     }
   };

@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -26,12 +27,9 @@ const PaymentSuccess: React.FC = () => {
       return;
     }
 
-    if (sessionId && user) {
-      verifyPayment();
-    } else {
-      setLoading(false);
-    }
-  }, [sessionId, user]);
+    verifyPayment();
+
+  }, []);
 
   const verifyPayment = async () => {
     try {
@@ -43,7 +41,7 @@ const PaymentSuccess: React.FC = () => {
 
       setOrderProcessed(true);
       clearCart();
-      
+
       toast({
         title: "Pagamento confirmado!",
         description: "Seu pedido foi processado com sucesso.",
@@ -94,15 +92,15 @@ const PaymentSuccess: React.FC = () => {
                 Seu pagamento foi cancelado. Você pode tentar novamente quando quiser.
               </p>
               <div className="space-y-2">
-                <Button 
-                  onClick={() => navigate('/checkout')} 
+                <Button
+                  onClick={() => navigate('/checkout')}
                   className="w-full"
                 >
                   Tentar Novamente
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/')} 
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/')}
                   className="w-full"
                 >
                   Voltar às Compras
@@ -131,15 +129,15 @@ const PaymentSuccess: React.FC = () => {
                 Obrigado pela sua compra! Seu pedido foi processado com sucesso e em breve você receberá um e-mail de confirmação.
               </p>
               <div className="space-y-2">
-                <Button 
-                  onClick={() => navigate('/order-history')} 
+                <Button
+                  onClick={() => navigate('/order-history')}
                   className="w-full"
                 >
                   Ver Meus Pedidos
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/')} 
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/')}
                   className="w-full"
                 >
                   Continuar Comprando
@@ -151,6 +149,7 @@ const PaymentSuccess: React.FC = () => {
       </div>
     );
   }
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -169,6 +168,7 @@ const PaymentSuccess: React.FC = () => {
       </div>
     </div>
   );
+
 };
 
 export default PaymentSuccess;

@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Search, UserPlus, Shield, Users, Edit, Plus } from 'lucide-react';
 import CartDrawer from '@/components/CartDrawer';
 import Header from '@/components/Header';
+import { Loading } from '@/components/Loading';
 
 interface UserRole {
   id: string;
@@ -141,7 +142,7 @@ const UserManagement = () => {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.email || (!editingProfile && !formData.password)) {
+    if ( (!editingProfile && !formData.email &&  !formData.password)) {
       toast({
         title: "Erro",
         description: "Email e senha são obrigatórios para criar um usuário.",
@@ -312,24 +313,12 @@ const UserManagement = () => {
     return userRole?.role || 'user';
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-muted-foreground">Carregando usuários...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <Header
         onCartClick={() => setIsCartOpen(true)}
       />
+      {loading && <Loading />}
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">

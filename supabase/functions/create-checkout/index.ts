@@ -81,7 +81,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: lineItems,
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/order-history?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/checkout?cancelled=true`,
       automatic_tax: { enabled: false },
       shipping_address_collection: {
